@@ -1,16 +1,21 @@
-.PHONY: docs
+.PHONY: install install-dev test clean
+
+install:
+	pip install -e .
+
+install-dev:
+	pip install -e .[dev]
+
+test:
+	pytest tests -v
 
 clean:
-	rm -rf dist
-	rm -rf build
+	rm -rf build/
+	rm -rf dist/
 	rm -rf *.egg-info
-	rm -rf *.egg
-	rm -rf *.whl
-	rm -rf *.tar.gz
-
-docs:
-	marimo --yes export html-wasm demo.py -o docs --mode edit
-
-pypi: clean
-	uv build
-	uv publish
+	rm -rf .coverage
+	rm -rf htmlcov/
+	rm -rf .pytest_cache/
+	rm -rf .mypy_cache/
+	find . -type d -name __pycache__ -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete

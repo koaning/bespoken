@@ -1,1 +1,1 @@
-"""Tests for bespoken package."""
+"""Tests for bespoken."""

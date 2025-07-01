@@ -16,7 +16,7 @@ import threading
 load_dotenv(".env")
 
 # Debug mode - set to True to see LLM's perspective
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 custom_style_fancy = Style([
     ('qmark', 'fg:#673ab7 bold'),       # token in front of the question
@@ -177,19 +177,22 @@ model = llm.get_model("claude-4-sonnet")
 
 conversation = model.conversation(tools=[FileTools()])
 
-while True:
-    out = questionary.text("", qmark=">", style=custom_style_fancy).ask()
-    if out == "quit":
-        break
-    # Show spinner while getting initial response
-    spinner = Spinner("dots", text="[dim]Thinking...[/dim]")
-    response_started = False
-    
-    with Live(spinner, console=console, refresh_per_second=10) as live:
-        for chunk in conversation.chain(out, system="You are a coding assistant that can make edits to a single file. In particular you will make edits to a marimo notebook."):
-            if not response_started:
-                # First chunk received, stop the spinner
-                live.stop()
-                response_started = True
-            print(chunk, end="", flush=True)
-    print()
+try:
+    while True:
+        out = questionary.text("", qmark=">", style=custom_style_fancy).ask()
+        if out == "quit":
+            break
+        # Show spinner while getting initial response
+        spinner = Spinner("dots", text="[dim]Thinking...[/dim]")
+        response_started = False
+        
+        with Live(spinner, console=console, refresh_per_second=10) as live:
+            for chunk in conversation.chain(out, system="You are a coding assistant that can make edits to a single file. In particular you will make edits to a marimo notebook."):
+                if not response_started:
+                    # First chunk received, stop the spinner
+                    live.stop()
+                    response_started = True
+                print(f"[dim]{chunk}[/dim]", end="", flush=True)
+        print()
+except KeyboardInterrupt:
+    print("\n\n[cyan]Thanks for using the chat assistant. Goodbye![/cyan]\n")

@@ -6,6 +6,11 @@ from questionary import Style
 from dotenv import load_dotenv
 from pathlib import Path
 from rich import print
+from rich.console import Console
+from rich.spinner import Spinner
+from rich.live import Live
+import difflib
+import threading
 
 
 load_dotenv(".env")
@@ -23,6 +28,8 @@ class FileTools(llm.Toolbox):
     
     def list_files(self, directory: Optional[str] = None) -> str:
         """List files and directories."""
+        print(f"[cyan]🔧 Listing files in {directory or 'current directory'}...[/cyan]")
+        print()
         target_dir = self._resolve_path(directory) if directory else self.working_directory
         
         items = []
@@ -36,6 +43,8 @@ class FileTools(llm.Toolbox):
     
     def read_file(self, file_path: str) -> str:
         """Read content from a file."""
+        print(f"[cyan]🔧 Reading file: {file_path}[/cyan]")
+        print()
         full_path = self._resolve_path(file_path)
         content = full_path.read_text(encoding='utf-8', errors='replace')
         
@@ -46,6 +55,8 @@ class FileTools(llm.Toolbox):
     
     def write_file(self, file_path: str, content: str) -> str:
         """Write content to a file."""
+        print(f"[cyan]🔧 Writing {len(content):,} characters to: {file_path}[/cyan]")
+        print()
         full_path = self._resolve_path(file_path)
         full_path.parent.mkdir(parents=True, exist_ok=True)
         full_path.write_text(content, encoding='utf-8')
@@ -54,6 +65,8 @@ class FileTools(llm.Toolbox):
     
     def replace_in_file(self, file_path: str, old_string: str, new_string: str) -> str:
         """Replace string in file and show diff."""
+        print(f"[cyan]🔧 Replacing text in: {file_path}[/cyan]")
+        print()
         full_path = self._resolve_path(file_path)
         original_content = full_path.read_text(encoding='utf-8')
         new_content = original_content.replace(old_string, new_string)
@@ -85,6 +98,7 @@ custom_style_fancy = Style([
     ('disabled', 'fg:#858585 italic')   # disabled choices for select and checkbox prompts
 ])
 
+console = Console()
 model = llm.get_model("claude-4-sonnet")
 
 conversation = model.conversation(tools=[FileTools()])
@@ -95,33 +109,15 @@ while True:
     out = questionary.text("", qmark=">", style=custom_style_fancy).ask()
     if out == "quit":
         break
-    response = conversation.chain(out)
-
-    # Show tool calls
-    tool_calls = []
-
-    for r in response.responses():
-        if hasattr(r, 'tool_calls'):
-            tool_calls.extend(r.tool_calls())
+    # Show spinner while getting initial response
+    spinner = Spinner("dots", text="[dim]Thinking...[/dim]")
+    response_started = False
     
-    if tool_calls:
-        print("\nTool calls:")
-        for call in tool_calls:
-            args = ', '.join(f'{k}={v!r}' for k, v in call.arguments.items())
-            print(f"  - {call.name}({args})")
-
-    for chunk in response:
-        print(chunk, end="", flush=True)
+    with Live(spinner, console=console, refresh_per_second=10) as live:
+        for chunk in conversation.chain(out):
+            if not response_started:
+                # First chunk received, stop the spinner
+                live.stop()
+                response_started = True
+            print(chunk, end="", flush=True)
     print()
-
-    tool_calls = []
-
-    for r in response.responses():
-        if hasattr(r, 'tool_calls'):
-            tool_calls.extend(r.tool_calls())
-    
-    if tool_calls:
-        print("\nTool calls:")
-        for call in tool_calls:
-            args = ', '.join(f'{k}={v!r}' for k, v in call.arguments.items())
-            print(f"  - {call.name}({args})")

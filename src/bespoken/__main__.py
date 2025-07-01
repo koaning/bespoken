@@ -1,3 +1,5 @@
+from typing import Optional
+
 import llm
 import typer
 from dotenv import load_dotenv
@@ -8,7 +10,6 @@ from rich.live import Live
 from rich.prompt import Prompt
 
 from . import config
-from .tools import FileSystem
 
 
 load_dotenv(".env")
@@ -17,50 +18,14 @@ load_dotenv(".env")
 def chat(
     debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug mode to see LLM interactions"),
     model_name: str = typer.Option("anthropic/claude-3-5-sonnet-20240620", "--model", "-m", help="LLM model to use"),
-    system_prompt: str = typer.Option(
-        "You are a coding assistant that can make edits to files. In particular you will make edits to marimo notebooks.",
-        "--system", "-s", 
-        help="System prompt for the assistant"
-    ),
-    file_path: str = typer.Option(
-        None, 
-        "--file", "-f", 
-        help="Focus on editing a single file (uses FileTool instead of FileSystem)"
-    ),
+    system_prompt: Optional[str] = typer.Option(None, "--system", "-s", help="System prompt for the assistant"),
+    tools: list = None,
 ):
     """Run the bespoken chat assistant."""
     # Set debug mode globally
     config.DEBUG_MODE = debug
-    
-    if debug:
-        print("[magenta]Debug mode enabled[/magenta]\n")
-    
-    console = Console()
-    
-    try:
-        model = llm.get_model(model_name)
-    except Exception as e:
-        print(f"[red]Error loading model '{model_name}': {e}[/red]")
-        raise typer.Exit(1)
-    
-    # Choose tools based on whether a specific file is provided
-    if file_path:
-        from .tools import FileTool
-        try:
-            tools = [FileTool(file_path)]
-            if debug:
-                print(f"[magenta]Using FileTool for: {file_path}[/magenta]\n")
-        except FileNotFoundError as e:
-            print(f"[red]Error: {e}[/red]")
-            raise typer.Exit(1)
-    else:
-        tools = [FileSystem()]
-        if debug:
-            print("[magenta]Using FileSystem for multi-file operations[/magenta]\n")
-    
-    conversation = model.conversation(tools=tools)
-    
-    # ASCII art welcome
+
+        # ASCII art welcome
     ascii_art = """
 [bold cyan]
 ██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
@@ -76,6 +41,19 @@ def chat(
 """
     
     print(ascii_art)
+    
+    if debug:
+        print("[magenta]Debug mode enabled[/magenta]\n")
+    
+    console = Console()
+    
+    try:
+        model = llm.get_model(model_name)
+    except Exception as e:
+        print(f"[red]Error loading model '{model_name}': {e}[/red]")
+        raise typer.Exit(1)
+    
+    conversation = model.conversation(tools=tools)
     
     try:
         while True:

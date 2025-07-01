@@ -6,7 +6,7 @@ import difflib
 import re
 import llm
 from rich import print, get_console
-from rich.prompt import Confirm
+from rich.prompt import Confirm, Prompt
 
 from .. import config
 
@@ -137,99 +137,114 @@ class FileSystem(llm.Toolbox):
             return self._debug_return(f"No changes needed in '{file_path}'")
 
 
-class FileTool(llm.Toolbox):
-    """Single file editing toolbox - focused on editing one specific file."""
+def FileTool(file_path: Optional[str] = None):
+    """Factory function to create a FileTool with file-specific docstring."""
+    if file_path is None:
+        file_path = Prompt.ask("Enter the path to the file you want to edit")
     
-    def __init__(self, file_path: str):
-        self.file_path = Path(file_path).resolve()
-        if not self.file_path.exists():
-            raise FileNotFoundError(f"File does not exist: {file_path}")
+    file_path_obj = Path(file_path).resolve()
+    if not file_path_obj.exists():
+        raise FileNotFoundError(f"File does not exist: {file_path}")
     
-    def _debug_return(self, value: str) -> str:
-        """Helper to show what the LLM receives from tools"""
-        config.tool_debug(f"\n>>> Tool returning to LLM: {repr(value)}\n")
-        return value
-    
-    def read_file(self) -> str:
-        """Read the content of the target file."""
-        config.tool_debug(">>> LLM calling tool: read_file()")
-        config.tool_status(f"Reading file: {self.file_path.name}")
+    class _FileTool(llm.Toolbox):
+        f"""Single file editing toolbox - focused on editing {file_path_obj.name}. This tool cannot be used to open or edit other files."""
         
-        content = self.file_path.read_text(encoding='utf-8', errors='replace')
+        def __init__(self):
+            self.file_path = file_path_obj
         
-        if len(content) > 50_000:
-            content = content[:50_000] + "\n... (truncated)"
+        def _debug_return(self, value: str) -> str:
+            """Helper to show what the LLM receives from tools"""
+            config.tool_debug(f"\n>>> Tool returning to LLM: {repr(value)}\n")
+            return value
+        
+        def get_file_path(self) -> str:
+            """Return the path to the file that this tool is allowed to edit."""
+            config.tool_debug(">>> LLM calling tool: get_file_path()")
+            config.tool_status(f"Getting file path for: {self.file_path.name}")
+            return self._debug_return(str(self.file_path))
+        
+        def read_file(self) -> str:
+            f"""Read the content of {self.file_path.name}. This tool cannot be used to open or edit other files."""
+            config.tool_debug(">>> LLM calling tool: read_file()")
+            config.tool_status(f"Reading file: {self.file_path.name}")
             
-        return self._debug_return(content)
-    
-    def replace_in_file(self, old_string: str, new_string: str) -> str:
-        """Replace string in the target file and show diff. The user may deny the change, in which case you should wait for new instructions."""
-        config.tool_debug(f">>> LLM calling tool: replace_in_file(old_string=<{len(old_string)} chars>, new_string=<{len(new_string)} chars>)")
-        config.tool_status(f"Preparing to replace text in: {self.file_path.name}")
-        
-        original_content = self.file_path.read_text(encoding='utf-8')
-        new_content = original_content.replace(old_string, new_string)
-        
-        diff_lines = list(difflib.unified_diff(
-            original_content.splitlines(keepends=True),
-            new_content.splitlines(keepends=True),
-            fromfile=f"{self.file_path.name} (before)",
-            tofile=f"{self.file_path.name} (after)",
-            n=3
-        ))
-        
-        if diff_lines:
-            # Show the diff with custom formatting
-            config.tool_warning("Proposed changes:")
-            print()
+            content = self.file_path.read_text(encoding='utf-8', errors='replace')
             
-            # Parse the diff to add line numbers and colors
-            line_num_old = 0
-            line_num_new = 0
+            if len(content) > 50_000:
+                content = content[:50_000] + "\n... (truncated)"
+                
+            return self._debug_return(content)
+        
+        def replace_in_file(self, old_string: str, new_string: str) -> str:
+            f"""Replace string in {self.file_path.name} and show diff. The user may deny the change, in which case you should wait for new instructions. This tool cannot be used to open or edit other files."""
+            config.tool_debug(f">>> LLM calling tool: replace_in_file(old_string=<{len(old_string)} chars>, new_string=<{len(new_string)} chars>)")
+            config.tool_status(f"Preparing to replace text in: {self.file_path.name}")
             
-            for line in diff_lines:
-                if line.startswith('---') or line.startswith('+++'):
-                    # File headers
-                    print(f"[dim]{line.rstrip()}[/dim]")
-                elif line.startswith('@@'):
-                    # Hunk header - extract line numbers
-                    match = re.search(r'-(\d+)(?:,\d+)? \+(\d+)(?:,\d+)?', line)
-                    if match:
-                        line_num_old = int(match.group(1))
-                        line_num_new = int(match.group(2))
-                    print(f"[cyan]{line.rstrip()}[/cyan]")
-                elif line.startswith('-'):
-                    # Removed line
-                    print(f"[on red][white]{line_num_old:4d} {line.rstrip()}[/white][/on red]")
-                    line_num_old += 1
-                elif line.startswith('+'):
-                    # Added line
-                    print(f"[on green][white]{line_num_new:4d} {line.rstrip()}[/white][/on green]")
-                    line_num_new += 1
-                elif line.startswith(' '):
-                    # Context line
-                    print(f"[dim]{line_num_old:4d}[/dim] {line.rstrip()}")
-                    line_num_old += 1
-                    line_num_new += 1
+            original_content = self.file_path.read_text(encoding='utf-8')
+            new_content = original_content.replace(old_string, new_string)
+            
+            diff_lines = list(difflib.unified_diff(
+                original_content.splitlines(keepends=True),
+                new_content.splitlines(keepends=True),
+                fromfile=f"{self.file_path.name} (before)",
+                tofile=f"{self.file_path.name} (after)",
+                n=3
+            ))
+            
+            if diff_lines:
+                # Show the diff with custom formatting
+                config.tool_warning("Proposed changes:")
+                print()
+                
+                # Parse the diff to add line numbers and colors
+                line_num_old = 0
+                line_num_new = 0
+                
+                for line in diff_lines:
+                    if line.startswith('---') or line.startswith('+++'):
+                        # File headers
+                        print(f"[dim]{line.rstrip()}[/dim]")
+                    elif line.startswith('@@'):
+                        # Hunk header - extract line numbers
+                        match = re.search(r'-(\d+)(?:,\d+)? \+(\d+)(?:,\d+)?', line)
+                        if match:
+                            line_num_old = int(match.group(1))
+                            line_num_new = int(match.group(2))
+                        print(f"[cyan]{line.rstrip()}[/cyan]")
+                    elif line.startswith('-'):
+                        # Removed line
+                        print(f"[on red][white]{line_num_old:4d} {line.rstrip()}[/white][/on red]")
+                        line_num_old += 1
+                    elif line.startswith('+'):
+                        # Added line
+                        print(f"[on green][white]{line_num_new:4d} {line.rstrip()}[/white][/on green]")
+                        line_num_new += 1
+                    elif line.startswith(' '):
+                        # Context line
+                        print(f"[dim]{line_num_old:4d}[/dim] {line.rstrip()}")
+                        line_num_old += 1
+                        line_num_new += 1
+                    else:
+                        # Other lines (shouldn't happen in unified diff)
+                        print(line.rstrip())
+                
+                print()  # Extra newline for clarity
+                
+                # Ask for confirmation
+                get_console().print()  # Force flush any pending output
+                confirm = Confirm.ask(
+                    "Apply these changes?", 
+                    default=True,
+                    console=get_console()
+                )
+                
+                if confirm:
+                    self.file_path.write_text(new_content, encoding='utf-8')
+                    return self._debug_return(f"Applied changes to '{self.file_path.name}'")
                 else:
-                    # Other lines (shouldn't happen in unified diff)
-                    print(line.rstrip())
-            
-            print()  # Extra newline for clarity
-            
-            # Ask for confirmation
-            get_console().print()  # Force flush any pending output
-            confirm = Confirm.ask(
-                "Apply these changes?", 
-                default=True,
-                console=get_console()
-            )
-            
-            if confirm:
-                self.file_path.write_text(new_content, encoding='utf-8')
-                return self._debug_return(f"Applied changes to '{self.file_path.name}'")
+                    config.tool_error("Changes cancelled. Please provide new instructions.")
+                    return self._debug_return("IMPORTANT: The user declined the changes. Do not continue with the task. Wait for new instructions from the user. IMPORTANT: Do not continue with the task.")
             else:
-                config.tool_error("Changes cancelled. Please provide new instructions.")
-                return self._debug_return("IMPORTANT: The user declined the changes. Do not continue with the task. Wait for new instructions from the user. IMPORTANT: Do not continue with the task.")
-        else:
-            return self._debug_return(f"No changes needed in '{self.file_path.name}'")
+                return self._debug_return(f"No changes needed in '{self.file_path.name}'")
+    
+    return _FileTool()

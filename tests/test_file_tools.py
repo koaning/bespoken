@@ -91,8 +91,9 @@ def test_replace_in_file_multiple_occurrences(mock_print, mock_confirm, file_too
     assert test_file.read_text() == "Hello, Universe! Welcome to the Universe of Python."
 
 
-@patch('builtins.print')
-def test_replace_in_file_with_debug_mode(mock_print, file_tools, temp_dir):
+@patch('bespoken.config.tool_debug')
+@patch('bespoken.config.tool_status')
+def test_replace_in_file_with_debug_mode(mock_tool_status, mock_tool_debug, file_tools, temp_dir):
     """Test that debug mode shows appropriate messages during replace."""
     config.DEBUG_MODE = True
     test_file = temp_dir / "test.txt"
@@ -100,8 +101,7 @@ def test_replace_in_file_with_debug_mode(mock_print, file_tools, temp_dir):
     
     file_tools.replace_in_file("test.txt", "Python", "Java")
     
-    # Check that debug messages were printed
-    debug_calls = [str(call[0][0]) for call in mock_print.call_args_list 
-                  if call[0] and call[0][0] and ">>>" in str(call[0][0])]
-    assert any("LLM calling tool: replace_in_file" in msg for msg in debug_calls)
+    # Check that debug messages were called
+    debug_calls = [str(call[0][0]) for call in mock_tool_debug.call_args_list]
+    assert any("LLM calling tool: replace_in_file(" in msg for msg in debug_calls)
     assert any("Tool returning to LLM" in msg for msg in debug_calls)

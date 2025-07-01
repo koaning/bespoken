@@ -161,7 +161,7 @@ def FileTool(file_path: Optional[str] = None):
             """Return the path to the file that this tool is allowed to edit."""
             config.tool_debug(">>> LLM calling tool: get_file_path()")
             config.tool_status(f"Getting file path for: {self.file_path.name}")
-            return self._debug_return(str(self.file_path))
+            return self._debug_return(f"This tool can only access one file: {self.file_path}. Other files exist but are not accessible through this tool.")
         
         def read_file(self) -> str:
             f"""Read the content of {self.file_path.name}. This tool cannot be used to open or edit other files."""

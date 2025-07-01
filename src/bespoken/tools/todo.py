@@ -15,17 +15,13 @@ class TodoTools(llm.Toolbox):
     
     def _debug_return(self, value: str) -> str:
         """Helper to show what the LLM receives from tools"""
-        if config.DEBUG_MODE:
-            print(f"\n[magenta]>>> Tool returning to LLM: {repr(value)}[/magenta]\n")
+        config.tool_debug(f"\n>>> Tool returning to LLM: {repr(value)}\n")
         return value
             
     def add_todo(self, task: str) -> str:
         """Add a new todo item."""
-        if config.DEBUG_MODE:
-            print(f"\n[magenta]>>> LLM calling tool: add_todo(task={repr(task)})[/magenta]")
-        print()  # Ensure we start on a new line
-        print(f"[cyan]Adding todo: {task}[/cyan]")
-        print()
+        config.tool_debug(f">>> LLM calling tool: add_todo(task={repr(task)})")
+        config.tool_status(f"Adding todo: {task}")
         
         self._todos.append({
             "task": task,
@@ -37,11 +33,8 @@ class TodoTools(llm.Toolbox):
     
     def list_todos(self) -> str:
         """List all todos with their status."""
-        if config.DEBUG_MODE:
-            print(f"\n[magenta]>>> LLM calling tool: list_todos()[/magenta]")
-        print()  # Ensure we start on a new line
-        print(f"[cyan]Listing todos...[/cyan]")
-        print()
+        config.tool_debug(">>> LLM calling tool: list_todos()")
+        config.tool_status("Listing todos...")
         
         if not self._todos:
             return self._debug_return("No todos found. Add one with add_todo()")
@@ -55,11 +48,8 @@ class TodoTools(llm.Toolbox):
     
     def mark_todo_done(self, index: int) -> str:
         """Mark a todo as completed."""
-        if config.DEBUG_MODE:
-            print(f"\n[magenta]>>> LLM calling tool: mark_todo_done(index={repr(index)})[/magenta]")
-        print()  # Ensure we start on a new line
-        print(f"[cyan]Marking todo #{index} as done...[/cyan]")
-        print()
+        config.tool_debug(f">>> LLM calling tool: mark_todo_done(index={repr(index)})")
+        config.tool_status(f"Marking todo #{index} as done...")
         
         todo = self._todos[index - 1]
         todo["done"] = True
@@ -69,11 +59,8 @@ class TodoTools(llm.Toolbox):
     
     def flush_todos(self) -> str:
         """Flush all todos."""
-        if config.DEBUG_MODE:
-            print(f"\n[magenta]>>> LLM calling tool: flush_todos()[/magenta]")
-        print()  # Ensure we start on a new line
-        print(f"[cyan]Flushing all todos...[/cyan]")
-        print()
+        config.tool_debug(">>> LLM calling tool: flush_todos()")
+        config.tool_status("Flushing all todos...")
         
         self._todos.clear()
         return self._debug_return("Flushed todos. All todos have been deleted.")

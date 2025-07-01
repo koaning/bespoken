@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 import pytest
 
-from bespoken.tools import FileTools
+from bespoken.tools import FileSystem
 from bespoken import config
 
 
@@ -20,8 +20,8 @@ def temp_dir():
 
 @pytest.fixture
 def file_tools(temp_dir):
-    """Create FileTools instance with temporary directory."""
-    return FileTools(str(temp_dir))
+    """Create FileSystem instance with temporary directory."""
+    return FileSystem(str(temp_dir))
 
 
 @pytest.fixture(autouse=True)
@@ -32,14 +32,14 @@ def reset_debug_mode():
     config.DEBUG_MODE = original
 
 
-@patch('questionary.confirm')
+@patch('rich.prompt.Confirm.ask')
 @patch('builtins.print')
 def test_replace_in_file_accepted(mock_print, mock_confirm, file_tools, temp_dir):
     """Test replacing text in file when user accepts."""
     test_file = temp_dir / "test.txt"
     test_file.write_text("Hello, World!")
     
-    mock_confirm.return_value.ask.return_value = True
+    mock_confirm.return_value = True
     
     result = file_tools.replace_in_file("test.txt", "World", "Python")
     
@@ -48,7 +48,7 @@ def test_replace_in_file_accepted(mock_print, mock_confirm, file_tools, temp_dir
     assert mock_confirm.called
 
 
-@patch('questionary.confirm')
+@patch('rich.prompt.Confirm.ask')
 @patch('builtins.print')
 def test_replace_in_file_declined(mock_print, mock_confirm, file_tools, temp_dir):
     """Test replacing text in file when user declines."""
@@ -56,7 +56,7 @@ def test_replace_in_file_declined(mock_print, mock_confirm, file_tools, temp_dir
     original_content = "Hello, World!"
     test_file.write_text(original_content)
     
-    mock_confirm.return_value.ask.return_value = False
+    mock_confirm.return_value = False
     
     result = file_tools.replace_in_file("test.txt", "World", "Python")
     
@@ -76,14 +76,14 @@ def test_replace_in_file_no_changes(mock_print, file_tools, temp_dir):
     assert result == "No changes needed in 'test.txt'"
 
 
-@patch('questionary.confirm')
+@patch('rich.prompt.Confirm.ask')
 @patch('builtins.print')
 def test_replace_in_file_multiple_occurrences(mock_print, mock_confirm, file_tools, temp_dir):
     """Test replacing multiple occurrences of text."""
     test_file = temp_dir / "test.txt"
     test_file.write_text("Hello, World! Welcome to the World of Python.")
     
-    mock_confirm.return_value.ask.return_value = True
+    mock_confirm.return_value = True
     
     result = file_tools.replace_in_file("test.txt", "World", "Universe")
     

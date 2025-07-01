@@ -1,15 +1,14 @@
 import llm
-import questionary
 import typer
 from dotenv import load_dotenv
 from rich import print
 from rich.console import Console
 from rich.spinner import Spinner
 from rich.live import Live
+from rich.prompt import Prompt
 
 from . import config
-from .config import custom_style_fancy
-from .tools import FileTools
+from .tools import FileSystem
 
 
 load_dotenv(".env")
@@ -18,6 +17,16 @@ load_dotenv(".env")
 def chat(
     debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug mode to see LLM interactions"),
     model_name: str = typer.Option("anthropic/claude-3-5-sonnet-20240620", "--model", "-m", help="LLM model to use"),
+    system_prompt: str = typer.Option(
+        "You are a coding assistant that can make edits to files. In particular you will make edits to marimo notebooks.",
+        "--system", "-s", 
+        help="System prompt for the assistant"
+    ),
+    file_path: str = typer.Option(
+        None, 
+        "--file", "-f", 
+        help="Focus on editing a single file (uses FileTool instead of FileSystem)"
+    ),
 ):
     """Run the bespoken chat assistant."""
     # Set debug mode globally
@@ -34,29 +43,62 @@ def chat(
         print(f"[red]Error loading model '{model_name}': {e}[/red]")
         raise typer.Exit(1)
     
-    conversation = model.conversation(tools=[FileTools()])
+    # Choose tools based on whether a specific file is provided
+    if file_path:
+        from .tools import FileTool
+        try:
+            tools = [FileTool(file_path)]
+            if debug:
+                print(f"[magenta]Using FileTool for: {file_path}[/magenta]\n")
+        except FileNotFoundError as e:
+            print(f"[red]Error: {e}[/red]")
+            raise typer.Exit(1)
+    else:
+        tools = [FileSystem()]
+        if debug:
+            print("[magenta]Using FileSystem for multi-file operations[/magenta]\n")
     
-    print("[cyan]Welcome to Bespoken! Type 'quit' to exit.[/cyan]\n")
+    conversation = model.conversation(tools=tools)
+    
+    # ASCII art welcome
+    ascii_art = """
+[bold cyan]
+██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
+██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
+██████╔╝█████╗  ███████╗██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
+██╔══██╗██╔══╝  ╚════██║██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
+██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
+╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+[/bold cyan]
+
+[dim]An AI-powered coding assistant for interactive file editing[/dim]
+[cyan]Type 'quit' to exit.[/cyan]
+"""
+    
+    print(ascii_art)
     
     try:
         while True:
-            out = questionary.text("", qmark=">", style=custom_style_fancy).ask()
+            out = Prompt.ask("[bold purple]>[/bold purple]", console=console, default="", show_default=False)
             if out == "quit":
                 break
+            
+            print()  # Add whitespace before thinking spinner
             # Show spinner while getting initial response
             spinner = Spinner("dots", text="[dim]Thinking...[/dim]")
             response_started = False
             
             with Live(spinner, console=console, refresh_per_second=10) as live:
-                for chunk in conversation.chain(out, system="You are a coding assistant that can make edits to a single file. In particular you will make edits to a marimo notebook."):
+                for chunk in conversation.chain(out, system=system_prompt):
                     if not response_started:
                         # First chunk received, stop the spinner
                         live.stop()
                         response_started = True
+                        print()  # Add whitespace after spinner
                         if config.DEBUG_MODE:
-                            print("\n[magenta]>>> LLM Response:[/magenta]\n")
+                            print("[magenta]>>> LLM Response:[/magenta]\n")
                     print(f"[dim]{chunk}[/dim]", end="", flush=True)
-            print()
+            print("\n")  # Add extra newline after bot response
     except KeyboardInterrupt:
         print("\n\n[cyan]Thanks for using Bespoken. Goodbye![/cyan]\n")
 

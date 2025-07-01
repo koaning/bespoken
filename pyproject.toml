@@ -5,10 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bespoken"
 version = "0.1.0"
-description = "A Python project"
-authors = [{name = "Your Name", email = "your.email@example.com"}]
+description = "An AI-powered coding assistant for editing files with interactive confirmations"
 readme = "README.md"
 requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+keywords = ["ai", "assistant", "llm", "code-editor", "marimo"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -20,22 +24,59 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
+
 dependencies = [
+    "llm>=0.12",
+    "questionary>=2.0.0",
     "rich>=13.0.0",
+    "python-dotenv>=1.0.0",
     "typer>=0.9.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=6.0",
-    "pytest-cov",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
 ]
+
+[project.scripts]
+bespoken = "bespoken.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/bespoken"
+Documentation = "https://github.com/yourusername/bespoken#readme"
+Repository = "https://github.com/yourusername/bespoken.git"
+Issues = "https://github.com/yourusername/bespoken/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.setuptools.package-dir]
-"" = "src"
+[tool.black]
+line-length = 88
+target-version = ['py38']
 
-[project.scripts]
-bespoken-chat = "bespoken.chat:main"
+[tool.ruff]
+line-length = 88
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+ignore = []
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]

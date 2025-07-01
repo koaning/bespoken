@@ -167,32 +167,38 @@ class FileTools(llm.Toolbox):
                 return self._debug_return(f"Applied changes to '{file_path}'")
             else:
                 print("\n[red]Changes cancelled. Please provide new instructions.[/red]\n")
-                return self._debug_return("IMPORTANT: The user declined the changes. Do not continue with the task. Wait for new instructions from the user.")
+                return self._debug_return("IMPORTANT: The user declined the changes. Do not continue with the task. Wait for new instructions from the user. IMPORTANT: Do not continue with the task.")
         else:
             return self._debug_return(f"No changes needed in '{file_path}'")
 
 
-console = Console()
-model = llm.get_model("claude-4-sonnet")
+def main():
+    """Main entry point for the bespoken CLI."""
+    console = Console()
+    model = llm.get_model("anthropic/claude-3-5-sonnet-20240620")
+    
+    conversation = model.conversation(tools=[FileTools()])
+    
+    try:
+        while True:
+            out = questionary.text("", qmark=">", style=custom_style_fancy).ask()
+            if out == "quit":
+                break
+            # Show spinner while getting initial response
+            spinner = Spinner("dots", text="[dim]Thinking...[/dim]")
+            response_started = False
+            
+            with Live(spinner, console=console, refresh_per_second=10) as live:
+                for chunk in conversation.chain(out, system="You are a coding assistant that can make edits to a single file. In particular you will make edits to a marimo notebook."):
+                    if not response_started:
+                        # First chunk received, stop the spinner
+                        live.stop()
+                        response_started = True
+                    print(f"[dim]{chunk}[/dim]", end="", flush=True)
+            print()
+    except KeyboardInterrupt:
+        print("\n\n[cyan]Thanks for using the chat assistant. Goodbye![/cyan]\n")
 
-conversation = model.conversation(tools=[FileTools()])
 
-try:
-    while True:
-        out = questionary.text("", qmark=">", style=custom_style_fancy).ask()
-        if out == "quit":
-            break
-        # Show spinner while getting initial response
-        spinner = Spinner("dots", text="[dim]Thinking...[/dim]")
-        response_started = False
-        
-        with Live(spinner, console=console, refresh_per_second=10) as live:
-            for chunk in conversation.chain(out, system="You are a coding assistant that can make edits to a single file. In particular you will make edits to a marimo notebook."):
-                if not response_started:
-                    # First chunk received, stop the spinner
-                    live.stop()
-                    response_started = True
-                print(f"[dim]{chunk}[/dim]", end="", flush=True)
-        print()
-except KeyboardInterrupt:
-    print("\n\n[cyan]Thanks for using the chat assistant. Goodbye![/cyan]\n")
+if __name__ == "__main__":
+    main()

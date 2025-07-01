@@ -1,1 +1,1 @@
-"""Bespoken package."""
+"""Bespoken - An AI-powered coding assistant for editing files with interactive confirmations."""

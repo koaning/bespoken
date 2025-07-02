@@ -6,6 +6,7 @@ did_fail = False
 
 try:
     from bespoken.tools import PlaywrightTool
+    PlaywrightTool()
 except ModuleNotFoundError:
     did_fail = True
 

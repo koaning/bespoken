@@ -1,0 +1,55 @@
+name: Test Optional Dependencies
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-without-optional-deps:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install minimal dependencies (no extras)
+      run: |
+        python -m pip install --upgrade pip
+        # Install without any extras to test NotInstalled behavior
+        pip install -e .
+        pip install pytest
+    
+    - name: Test that optional imports are handled gracefully
+      run: |
+        # Run a specific test to verify PlaywrightTool raises proper error
+        python -c "
+import pytest
+from bespoken.tools import PlaywrightTool
+
+# This should be a NotInstalled instance
+print(f'PlaywrightTool type: {type(PlaywrightTool)}')
+
+# Try to instantiate - should raise ModuleNotFoundError
+try:
+    tool = PlaywrightTool()
+    print('ERROR: Should have raised ModuleNotFoundError')
+    exit(1)
+except ModuleNotFoundError as e:
+    print(f'SUCCESS: Got expected error: {e}')
+    assert 'PlaywrightTool' in str(e)
+    assert 'browser' in str(e)
+    assert 'pip install' in str(e)
+"
+    
+    - name: Run NotInstalled tests
+      run: |
+        pytest tests/test_not_installed.py -v -k "not test_playwright_import"

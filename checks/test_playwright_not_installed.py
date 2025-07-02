@@ -6,7 +6,7 @@ did_fail = False
 
 try:
     from bespoken.tools import PlaywrightTool
-except ImportError:
+except ModuleNotFoundError:
     did_fail = True
 
 assert did_fail, "PlaywrightTool should not be available when playwright is not installed"

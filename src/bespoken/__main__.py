@@ -36,7 +36,7 @@ def chat(
 ╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
 [/bold cyan]
 
-[dim]An AI-powered coding assistant for interactive file editing[/dim]
+[dim]A terminal chat experience that you can configure yourself.[/dim]
 [cyan]Type 'quit' to exit.[/cyan]
 """
     

@@ -21,7 +21,7 @@ class PlaywrightTool(llm.Toolbox):
         pip install bespoken[browser]
     """
     
-    def __init__(self, headless: bool = True, browser_type: str = "chromium"):
+    def __init__(self, headless: bool = False, browser_type: str = "chromium"):
         if not PLAYWRIGHT_AVAILABLE:
             print("[red]Error: Playwright is not installed.[/red]")
             print("[yellow]Install with: pip install 'bespoken[browser]' or uv pip install 'bespoken[browser]'[/yellow]")
@@ -84,8 +84,9 @@ class PlaywrightTool(llm.Toolbox):
         
         self._ensure_browser()
         try:
-            # Click the first element containing this text
-            self._page.get_by_text(text).first.click()
+            # Use force click as primary strategy
+            config.tool_debug("Using force click strategy")
+            self._page.get_by_text(text).first.click(force=True)
             
             config.tool_success(f"Clicked: {text}")
             return self._debug_return(f"Successfully clicked element with text: {text}")

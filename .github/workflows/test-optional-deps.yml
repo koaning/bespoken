@@ -52,4 +52,8 @@ except ModuleNotFoundError as e:
     
     - name: Run NotInstalled tests
       run: |
-        pytest tests/test_not_installed.py -v -k "not test_playwright_import"
+        pytest tests/test_not_installed.py -v
+    
+    - name: Run checks for missing dependencies
+      run: |
+        python checks/test_playwright_not_installed.py

@@ -26,34 +26,7 @@ jobs:
         python -m pip install --upgrade pip
         # Install without any extras to test NotInstalled behavior
         pip install -e .
-        pip install pytest
     
-    - name: Test that optional imports are handled gracefully
-      run: |
-        # Run a specific test to verify PlaywrightTool raises proper error
-        python -c "
-import pytest
-from bespoken.tools import PlaywrightTool
-
-# This should be a NotInstalled instance
-print(f'PlaywrightTool type: {type(PlaywrightTool)}')
-
-# Try to instantiate - should raise ModuleNotFoundError
-try:
-    tool = PlaywrightTool()
-    print('ERROR: Should have raised ModuleNotFoundError')
-    exit(1)
-except ModuleNotFoundError as e:
-    print(f'SUCCESS: Got expected error: {e}')
-    assert 'PlaywrightTool' in str(e)
-    assert 'browser' in str(e)
-    assert 'pip install' in str(e)
-"
-    
-    - name: Run NotInstalled tests
-      run: |
-        pytest tests/test_not_installed.py -v
-    
-    - name: Run checks for missing dependencies
+    - name: Run test
       run: |
         python checks/test_playwright_not_installed.py

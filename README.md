@@ -1,38 +1,42 @@
 # bespoken
 
-Tools to build your own "taskmaster" - an AI-powered coding assistant with interactive file editing and web automation capabilities.
+```
+
+██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
+██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
+██████╔╝█████╗  ███████╗██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
+██╔══██╗██╔══╝  ╚════██║██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
+██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
+╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+
+
+A terminal chat experience that you can configure yourself.
+```
 
 ## Installation
 
 Basic installation:
+
 ```bash
-pip install bespoken
+uv pip install bespoken
 ```
-
-With browser automation support (Playwright):
-```bash
-pip install 'bespoken[browser]'
-playwright install  # Download browser binaries
-```
-
-## Features
-
-- **FileSystem**: Work with multiple files and directories
-- **FileTool**: Edit a single file with interactive confirmations
-- **TodoTools**: Manage tasks during your coding session
-- **WebFetchTool**: Fetch and convert web content to markdown
-- **PlaywrightTool**: Browser automation for dynamic web interactions (optional)
 
 ## Usage
 
+This library uses [llm](https://llm.datasette.io/en/stable/) under the hood to provide you with building blocks to make chat interfaces from the commandline. Here's an example. 
+
 ```python
 from bespoken import chat
-from bespoken.tools import FileTool, TodoTools
+from bespoken.tools import FileTool, TodoTools, PlaywrightTool
 
 chat(
     model_name="anthropic/claude-3-5-sonnet-20240620",
-    tools=[FileTool("edit.py"), TodoTools()],
-    system_prompt="You are a coding assistant.",
-    debug=False,
+    tools=[FileTool("edit.py"), TodoTools(), PlaywrightTool()],
+    system_prompt="You are a coding assistant that can make edits to a single file that is defined by the filetool.",
+    debug=True,
 )
 ```
+
+The goal is to host a bunch of tools that you can pass to the LLM, but the main idea here is that you can also make it easy to constrain the chat. The `FileTool`, for example, only allows the LLM to make edits to a single file declared upfront. This significantly reduces any injection risks and still covers a lot of use-cases. 
+
+This project is in early days at the moment, but it feels exciting to work on!

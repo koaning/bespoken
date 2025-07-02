@@ -3,13 +3,14 @@
 from .filesystem import FileSystem, FileTool
 from .todo import TodoTools
 from .webfetch import WebFetchTool
+from .not_installed import NotInstalled
 
-__all__ = ["FileSystem", "FileTool", "TodoTools", "WebFetchTool"]
-
-# Optional imports
 try:
     from .playwright_browser import PlaywrightTool
-    __all__.append("PlaywrightTool")
 except ImportError:
-    # Playwright not installed
-    pass
+    # Replace with NotInstalled proxy
+    PlaywrightTool = NotInstalled("PlaywrightTool", "browser")
+
+
+
+__all__ = ["FileSystem", "FileTool", "TodoTools", "WebFetchTool", "PlaywrightTool"]

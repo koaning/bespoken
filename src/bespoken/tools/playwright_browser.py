@@ -1,17 +1,10 @@
 """Playwright browser tool for dynamic web interaction."""
 
-import sys
 from typing import Optional
 import llm
-from rich import print
 
 from .. import config
-
-try:
-    from playwright.sync_api import sync_playwright, Page, Browser
-    PLAYWRIGHT_AVAILABLE = True
-except ImportError:
-    PLAYWRIGHT_AVAILABLE = False
+from playwright.sync_api import sync_playwright, Browser, Page
 
 
 class PlaywrightTool(llm.Toolbox):
@@ -22,12 +15,6 @@ class PlaywrightTool(llm.Toolbox):
     """
     
     def __init__(self, headless: bool = False, browser_type: str = "chromium"):
-        if not PLAYWRIGHT_AVAILABLE:
-            print("[red]Error: Playwright is not installed.[/red]")
-            print("[yellow]Install with: pip install 'bespoken[browser]' or uv pip install 'bespoken[browser]'[/yellow]")
-            print("[yellow]Then run: playwright install[/yellow]")
-            sys.exit(1)
-            
         self.headless = headless
         self.browser_type = browser_type
         self._playwright = None

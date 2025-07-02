@@ -1,4 +1,4 @@
-name: Tests
+name: Test Optional Dependencies
 
 on:
   push:
@@ -7,11 +7,11 @@ on:
     branches: [ main, master ]
 
 jobs:
-  test:
+  test-without-optional-deps:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.11"]
 
     steps:
     - uses: actions/checkout@v4
@@ -21,12 +21,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
-    - name: Install dependencies
+    - name: Install minimal dependencies (no extras)
       run: |
         python -m pip install --upgrade pip
-        pip install -e .[dev]
+        # Install without any extras to test NotInstalled behavior
+        pip install -e .
     
-    - name: Run tests
+    - name: Run test
       run: |
-        pytest tests -v
-
+        python checks/test_playwright_not_installed.py

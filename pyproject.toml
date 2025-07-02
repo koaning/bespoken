@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bespoken"
-version = "0.1.0"
+version = "0.2.0"
 description = "An AI-powered coding assistant for editing files with interactive confirmations"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -30,6 +30,9 @@ dependencies = [
     "rich>=13.0.0",
     "python-dotenv>=1.0.0",
     "typer>=0.9.0",
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "markdownify>=0.11.0",
 ]
 
 [project.optional-dependencies]

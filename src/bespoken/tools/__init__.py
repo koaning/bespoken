@@ -2,5 +2,6 @@
 
 from .filesystem import FileSystem, FileTool
 from .todo import TodoTools
+from .webfetch import WebFetchTool
 
-__all__ = ["FileSystem", "FileTool", "TodoTools"]
+__all__ = ["FileSystem", "FileTool", "TodoTools", "WebFetchTool"]

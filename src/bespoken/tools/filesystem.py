@@ -154,7 +154,7 @@ def FileTool(file_path: Optional[str] = None):
         
         def _debug_return(self, value: str) -> str:
             """Helper to show what the LLM receives from tools"""
-            config.tool_debug(f"\n>>> Tool returning to LLM: {repr(value)}\n")
+            config.tool_debug(f"\n>>> Tool returning to LLM: {value}\n")
             return value
         
         def get_file_path(self) -> str:

@@ -27,6 +27,9 @@ _DEFAULT_SUBTITLE = """[dim]A terminal chat experience that you can configure yo
 _custom_ascii_art = None
 _custom_subtitle = None
 
+# Trust settings for tools
+_trusted_tools = set()
+
 
 def print(text: str, indent: int = LEFT_PADDING) -> None:
     """Print text with left padding."""
@@ -150,3 +153,37 @@ def show_banner() -> None:
     # Print the banner
     _console.print()  # Add space before banner
     _console.print('\n'.join(banner_lines))
+
+
+def trust_tool(tool_name: str) -> None:
+    """Mark a tool as trusted (no confirmation needed)."""
+    _trusted_tools.add(tool_name)
+
+
+def untrust_tool(tool_name: str) -> None:
+    """Remove a tool from the trusted list."""
+    _trusted_tools.discard(tool_name)
+
+
+def is_tool_trusted(tool_name: str) -> bool:
+    """Check if a tool is trusted."""
+    return tool_name in _trusted_tools
+
+
+def confirm_tool_action(tool_name: str, action_description: str, details: dict = None, default: bool = True) -> bool:
+    """Confirm a tool action, respecting trust settings."""
+    # If tool is trusted, auto-confirm
+    if is_tool_trusted(tool_name):
+        print(f"[dim]Auto-executing trusted tool: {tool_name}[/dim]")
+        return True
+    
+    # Otherwise, show details and ask for confirmation
+    print(f"[bold yellow]Tool: {tool_name}[/bold yellow]")
+    print(f"[bold]Action:[/bold] {action_description}")
+    
+    if details:
+        for key, value in details.items():
+            if value:  # Only show non-empty values
+                print(f"[bold]{key}:[/bold] {value}")
+    
+    return confirm(f"Execute this {tool_name} action?", default=default)

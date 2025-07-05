@@ -13,6 +13,7 @@ from rich.text import Text
 
 from . import config
 from . import ui
+from . import styles
 
 
 load_dotenv(".env")
@@ -22,6 +23,7 @@ def chat(
     debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug mode to see LLM interactions"),
     model_name: str = typer.Option("anthropic/claude-3-5-sonnet-20240620", "--model", "-m", help="LLM model to use"),
     system_prompt: Optional[str] = typer.Option(None, "--system", "-s", help="System prompt for the assistant"),
+    style: str = typer.Option("default", "--style", help="Visual style: default, minimal, hacker, professional, fun"),
     tools: list = None,
 ):
     """Run the bespoken chat assistant."""
@@ -30,11 +32,21 @@ def chat(
     
     console = Console()
 
+    # Apply selected style
+    if not styles.apply_style(style):
+        ui.print(f"[red]Unknown style '{style}'. Using default.[/red]")
+        styles.apply_style("default")
+
     # Show the banner
     ui.show_banner()
     
     if debug:
         ui.print("[magenta]Debug mode enabled[/magenta]")
+        print()
+    
+    # Check for prompt_toolkit
+    if not ui.PROMPT_TOOLKIT_AVAILABLE:
+        ui.print("[dim]Note: Install prompt_toolkit for tab completion: pip install prompt_toolkit[/dim]")
         print()
     
     try:
@@ -47,7 +59,15 @@ def chat(
     
     try:
         while True:
-            out = ui.input("[bold]> [/bold]")
+            # Define available commands for completion
+            completions = ["quit", "help", "clear", "style", "debug"]
+            
+            # Show completion hint on first prompt if prompt_toolkit is available
+            if not hasattr(chat, '_shown_completion_hint') and ui.PROMPT_TOOLKIT_AVAILABLE:
+                ui.print("[dim]Tips: TAB for completions • ↑/↓ for history • Start typing for suggestions[/dim]")
+                chat._shown_completion_hint = True
+            
+            out = ui.input("> ", completions=completions)
             if out == "quit":
                 break
             

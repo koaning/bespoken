@@ -1,8 +1,19 @@
 """User interface utilities for consistent formatting in bespoken."""
 
-from typing import List, Any
+from typing import List, Any, Optional
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
+
+try:
+    from prompt_toolkit import prompt
+    from prompt_toolkit.completion import WordCompleter
+    from prompt_toolkit.styles import Style
+    from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+    from prompt_toolkit.history import InMemoryHistory
+    from prompt_toolkit.formatted_text import HTML
+    PROMPT_TOOLKIT_AVAILABLE = True
+except ImportError:
+    PROMPT_TOOLKIT_AVAILABLE = False
 
 
 # Global padding configuration
@@ -29,6 +40,9 @@ _custom_subtitle = None
 
 # Trust settings for tools
 _trusted_tools = set()
+
+# Command history for prompt_toolkit
+_command_history = InMemoryHistory() if PROMPT_TOOLKIT_AVAILABLE else None
 
 
 def print(text: str, indent: int = LEFT_PADDING) -> None:
@@ -101,9 +115,42 @@ def stream(chunks, indent: int = LEFT_PADDING, wrap: bool = True) -> None:
         _console.print(f"[dim]{word_buffer}[/dim]", end="", highlight=False)
 
 
-def input(prompt: str, indent: int = LEFT_PADDING) -> str:
-    """Get input with left padding."""
-    return _console.input(" " * indent + prompt)
+def input(prompt_text: str, indent: int = LEFT_PADDING, completions: Optional[List[str]] = None) -> str:
+    """Get input with left padding and optional completions."""
+    padded_prompt = " " * indent + prompt_text
+    
+    if completions and PROMPT_TOOLKIT_AVAILABLE:
+        # Use prompt_toolkit for better completion support
+        completer = WordCompleter(completions, ignore_case=True, match_middle=True)
+        
+        # Create a style with auto-suggestion preview in gray
+        style = Style.from_dict({
+            # Default text style
+            '': '#ffffff',
+            # Auto-suggestions in gray
+            'auto-suggest': 'fg:#666666',
+            # Selected completion in menu
+            'completion-menu.completion.current': 'bg:#00aaaa #000000',
+            'completion-menu.completion': 'bg:#008888 #ffffff',
+        })
+        
+        try:
+            # Use prompt_toolkit with completer and auto-suggestions
+            result = prompt(
+                padded_prompt,
+                completer=completer,
+                style=style,
+                complete_while_typing=True,  # Show completions as you type
+                auto_suggest=AutoSuggestFromHistory(),  # Suggest from history
+                history=_command_history,  # Enable history with up/down arrows
+                enable_history_search=False,  # Disable Ctrl+R search
+            )
+            return result
+        except (KeyboardInterrupt, EOFError):
+            raise KeyboardInterrupt()
+    else:
+        # Fall back to Rich console input
+        return _console.input(padded_prompt)
 
 
 def confirm(prompt: str, indent: int = LEFT_PADDING, default: bool = True) -> bool:

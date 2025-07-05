@@ -28,7 +28,7 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        # The Monty Hall Problem Analysis 🎲
+        # The Monty Hall Problem Analysis
 
     A famous probability puzzle: You pick one of 3 doors (car behind one, goats behind two). The host opens a door with a goat, then asks if you want to switch.
 
@@ -42,7 +42,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md("## 🎯 Game Logic and Simulation")
+    mo.md("## Game Logic and Simulation")
     return
 
 

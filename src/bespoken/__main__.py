@@ -8,8 +8,11 @@ from rich.console import Console
 from rich.spinner import Spinner
 from rich.live import Live
 from rich.prompt import Prompt
+from rich.columns import Columns
+from rich.text import Text
 
 from . import config
+from . import ui
 
 
 load_dotenv(".env")
@@ -24,49 +27,53 @@ def chat(
     """Run the bespoken chat assistant."""
     # Set debug mode globally
     config.DEBUG_MODE = debug
-
-        # ASCII art welcome
-    ascii_art = """
-[bold cyan]
-██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
-██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
-██████╔╝█████╗  ███████╗██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
-██╔══██╗██╔══╝  ╚════██║██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
-██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
-╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
-[/bold cyan]
-
-[dim]A terminal chat experience that you can configure yourself.[/dim]
-[cyan]Type 'quit' to exit.[/cyan]
-"""
-    
-    print(ascii_art)
-    
-    if debug:
-        print("[magenta]Debug mode enabled[/magenta]\n")
     
     console = Console()
+
+        # ASCII art welcome
+    padding = " " * ui.LEFT_PADDING
+    ascii_art = f"""{padding}[bold cyan]
+{padding}██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
+{padding}██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
+{padding}██████╔╝█████╗  ███████╗██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
+{padding}██╔══██╗██╔══╝  ╚════██║██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
+{padding}██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
+{padding}╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+{padding}[/bold cyan]
+
+{padding}[dim]A terminal chat experience that you can configure yourself.[/dim]
+{padding}[cyan]Type 'quit' to exit.[/cyan]"""
+    
+    print()  # Add space before ASCII art
+    console.print(ascii_art)
+    
+    if debug:
+        ui.print("[magenta]Debug mode enabled[/magenta]", console=console)
+        print()
     
     try:
         model = llm.get_model(model_name)
     except Exception as e:
-        print(f"[red]Error loading model '{model_name}': {e}[/red]")
+        ui.print(f"[red]Error loading model '{model_name}': {e}[/red]", console=console)
         raise typer.Exit(1)
     
     conversation = model.conversation(tools=tools)
     
     try:
         while True:
-            out = console.input("[bold] > [/bold]")
+            out = ui.input("[bold]> [/bold]", console=console)
             if out == "quit":
                 break
             
             print()  # Add whitespace before thinking spinner
             # Show spinner while getting initial response
-            spinner = Spinner("dots", text="[dim]Thinking...[/dim]")
+            # Create a padded spinner
+            spinner_text = Text("Thinking...", style="dim")
+            padded_spinner = Columns([Text(" " * ui.LEFT_PADDING), Spinner("dots"), spinner_text], expand=False)
             response_started = False
             
-            with Live(spinner, console=console, refresh_per_second=10) as live:
+            with Live(padded_spinner, console=console, refresh_per_second=10) as live:
+                response_chunks = []
                 for chunk in conversation.chain(out, system=system_prompt):
                     if not response_started:
                         # First chunk received, stop the spinner
@@ -74,11 +81,17 @@ def chat(
                         response_started = True
                         print()  # Add whitespace after spinner
                         if config.DEBUG_MODE:
-                            print("[magenta]>>> LLM Response:[/magenta]\n")
-                    print(f"[dim]{chunk}[/dim]", end="", flush=True)
+                            ui.print("[magenta]>>> LLM Response:[/magenta]", console=console)
+                            print()
+                    response_chunks.append(chunk)
+                
+                # Stream the response with padding and wrapping
+                ui.stream(response_chunks, console=console)
             print("\n")  # Add extra newline after bot response
     except KeyboardInterrupt:
-        print("\n\n[cyan]Thanks for using Bespoken. Goodbye![/cyan]\n")
+        print("\n")  # Add newlines
+        ui.print("[cyan]Thanks for using Bespoken. Goodbye![/cyan]", console=console)
+        print()  # Add final newline
 
 
 def main():

@@ -9,6 +9,7 @@ from rich import print, get_console
 from rich.prompt import Confirm, Prompt
 
 from .. import config
+from .. import ui
 
 
 class FileSystem(llm.Toolbox):
@@ -92,36 +93,36 @@ class FileSystem(llm.Toolbox):
             for line in diff_lines:
                 if line.startswith('---') or line.startswith('+++'):
                     # File headers
-                    print(f"[dim]{line.rstrip()}[/dim]")
+                    ui.print(f"[dim]{line.rstrip()}[/dim]")
                 elif line.startswith('@@'):
                     # Hunk header - extract line numbers
                     match = re.search(r'-(\d+)(?:,\d+)? \+(\d+)(?:,\d+)?', line)
                     if match:
                         line_num_old = int(match.group(1))
                         line_num_new = int(match.group(2))
-                    print(f"[cyan]{line.rstrip()}[/cyan]")
+                    ui.print(f"[cyan]{line.rstrip()}[/cyan]")
                 elif line.startswith('-'):
                     # Removed line
-                    print(f"[on red][white]{line_num_old:4d} {line.rstrip()}[/white][/on red]")
+                    ui.print(f"[on red][white]{line_num_old:4d} {line.rstrip()}[/white][/on red]")
                     line_num_old += 1
                 elif line.startswith('+'):
                     # Added line
-                    print(f"[on green][white]{line_num_new:4d} {line.rstrip()}[/white][/on green]")
+                    ui.print(f"[on green][white]{line_num_new:4d} {line.rstrip()}[/white][/on green]")
                     line_num_new += 1
                 elif line.startswith(' '):
                     # Context line
-                    print(f"[dim]{line_num_old:4d}[/dim] {line.rstrip()}")
+                    ui.print(f"[dim]{line_num_old:4d}[/dim] {line.rstrip()}")
                     line_num_old += 1
                     line_num_new += 1
                 else:
                     # Other lines (shouldn't happen in unified diff)
-                    print(line.rstrip())
+                    ui.print(line.rstrip())
             
             print()  # Extra newline for clarity
             
             # Ask for confirmation
             get_console().print()  # Force flush any pending output
-            confirm = Confirm.ask(
+            confirm = ui.confirm(
                 "Apply these changes?", 
                 default=True,
                 console=get_console()
@@ -140,7 +141,7 @@ class FileSystem(llm.Toolbox):
 def FileTool(file_path: Optional[str] = None):
     """Factory function to create a FileTool with file-specific docstring."""
     if file_path is None:
-        file_path = Prompt.ask("Enter the path to the file you want to edit")
+        file_path = ui.input("Enter the path to the file you want to edit: ")
     
     file_path_obj = Path(file_path).resolve()
     if not file_path_obj.exists():
@@ -203,36 +204,36 @@ def FileTool(file_path: Optional[str] = None):
                 for line in diff_lines:
                     if line.startswith('---') or line.startswith('+++'):
                         # File headers
-                        print(f"[dim]{line.rstrip()}[/dim]")
+                        ui.print(f"[dim]{line.rstrip()}[/dim]")
                     elif line.startswith('@@'):
                         # Hunk header - extract line numbers
                         match = re.search(r'-(\d+)(?:,\d+)? \+(\d+)(?:,\d+)?', line)
                         if match:
                             line_num_old = int(match.group(1))
                             line_num_new = int(match.group(2))
-                        print(f"[cyan]{line.rstrip()}[/cyan]")
+                        ui.print(f"[cyan]{line.rstrip()}[/cyan]")
                     elif line.startswith('-'):
                         # Removed line
-                        print(f"[on red][white]{line_num_old:4d} {line.rstrip()}[/white][/on red]")
+                        ui.print(f"[on red][white]{line_num_old:4d} {line.rstrip()}[/white][/on red]")
                         line_num_old += 1
                     elif line.startswith('+'):
                         # Added line
-                        print(f"[on green][white]{line_num_new:4d} {line.rstrip()}[/white][/on green]")
+                        ui.print(f"[on green][white]{line_num_new:4d} {line.rstrip()}[/white][/on green]")
                         line_num_new += 1
                     elif line.startswith(' '):
                         # Context line
-                        print(f"[dim]{line_num_old:4d}[/dim] {line.rstrip()}")
+                        ui.print(f"[dim]{line_num_old:4d}[/dim] {line.rstrip()}")
                         line_num_old += 1
                         line_num_new += 1
                     else:
                         # Other lines (shouldn't happen in unified diff)
-                        print(line.rstrip())
+                        ui.print(line.rstrip())
                 
                 print()  # Extra newline for clarity
                 
                 # Ask for confirmation
                 get_console().print()  # Force flush any pending output
-                confirm = Confirm.ask(
+                confirm = ui.confirm(
                     "Apply these changes?", 
                     default=True,
                     console=get_console()

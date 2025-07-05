@@ -57,7 +57,7 @@ def chat(
     
     try:
         while True:
-            out = Prompt.ask("[bold purple]>[/bold purple]", console=console, default="", show_default=False)
+            out = console.input("[bold] > [/bold]")
             if out == "quit":
                 break
             

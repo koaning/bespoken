@@ -30,22 +30,8 @@ def chat(
     
     console = Console()
 
-        # ASCII art welcome
-    padding = " " * ui.LEFT_PADDING
-    ascii_art = f"""{padding}[bold cyan]
-{padding}██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
-{padding}██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
-{padding}██████╔╝█████╗  ███████╗██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
-{padding}██╔══██╗██╔══╝  ╚════██║██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
-{padding}██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
-{padding}╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
-{padding}[/bold cyan]
-
-{padding}[dim]A terminal chat experience that you can configure yourself.[/dim]
-{padding}[cyan]Type 'quit' to exit.[/cyan]"""
-    
-    print()  # Add space before ASCII art
-    console.print(ascii_art)
+    # Show the banner
+    ui.show_banner()
     
     if debug:
         ui.print("[magenta]Debug mode enabled[/magenta]")

@@ -12,6 +12,21 @@ RIGHT_PADDING = 2
 # Private console instance - all output must go through this module
 _console = Console()
 
+# Default ASCII art for bespoken
+_DEFAULT_ASCII_ART = """██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
+██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
+██████╔╝█████╗  ███████╗██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
+██╔══██╗██╔══╝  ╚════██║██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
+██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
+╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝"""
+
+_DEFAULT_SUBTITLE = """[dim]A terminal chat experience that you can configure yourself.[/dim]
+[cyan]Type 'quit' to exit.[/cyan]"""
+
+# Custom ASCII art storage
+_custom_ascii_art = None
+_custom_subtitle = None
+
 
 def print(text: str, indent: int = LEFT_PADDING) -> None:
     """Print text with left padding."""
@@ -100,3 +115,38 @@ def choice(prompt: str, choices: List[str], indent: int = LEFT_PADDING) -> str:
     # Add padding to the prompt
     padded_prompt = " " * indent + prompt
     return Prompt.ask(padded_prompt, choices=choices, console=_console)
+
+
+def set_ascii_art(ascii_art: str, subtitle: str = None) -> None:
+    """Set custom ASCII art and optional subtitle for the banner."""
+    global _custom_ascii_art, _custom_subtitle
+    _custom_ascii_art = ascii_art
+    _custom_subtitle = subtitle
+
+
+def show_banner() -> None:
+    """Display the ASCII art banner with padding."""
+    # Determine which art and subtitle to use
+    ascii_art = _custom_ascii_art if _custom_ascii_art is not None else _DEFAULT_ASCII_ART
+    subtitle = _custom_subtitle if _custom_subtitle is not None else _DEFAULT_SUBTITLE
+    
+    padding = " " * LEFT_PADDING
+    
+    # Build the complete banner
+    banner_lines = []
+    banner_lines.append(f"{padding}[bold cyan]")
+    
+    # Add ASCII art lines
+    for line in ascii_art.split('\n'):
+        banner_lines.append(f"{padding}{line}")
+    
+    banner_lines.append(f"{padding}[/bold cyan]")
+    banner_lines.append("")  # Empty line
+    
+    # Add subtitle lines
+    for line in subtitle.split('\n'):
+        banner_lines.append(f"{padding}{line}")
+    
+    # Print the banner
+    _console.print()  # Add space before banner
+    _console.print('\n'.join(banner_lines))

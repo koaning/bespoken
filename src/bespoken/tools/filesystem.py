@@ -124,8 +124,7 @@ class FileSystem(llm.Toolbox):
             get_console().print()  # Force flush any pending output
             confirm = ui.confirm(
                 "Apply these changes?", 
-                default=True,
-                console=get_console()
+                default=True
             )
             
             if confirm:
@@ -235,8 +234,7 @@ def FileTool(file_path: Optional[str] = None):
                 get_console().print()  # Force flush any pending output
                 confirm = ui.confirm(
                     "Apply these changes?", 
-                    default=True,
-                    console=get_console()
+                    default=True
                 )
                 
                 if confirm:

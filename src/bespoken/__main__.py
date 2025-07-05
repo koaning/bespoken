@@ -48,20 +48,20 @@ def chat(
     console.print(ascii_art)
     
     if debug:
-        ui.print("[magenta]Debug mode enabled[/magenta]", console=console)
+        ui.print("[magenta]Debug mode enabled[/magenta]")
         print()
     
     try:
         model = llm.get_model(model_name)
     except Exception as e:
-        ui.print(f"[red]Error loading model '{model_name}': {e}[/red]", console=console)
+        ui.print(f"[red]Error loading model '{model_name}': {e}[/red]")
         raise typer.Exit(1)
     
     conversation = model.conversation(tools=tools)
     
     try:
         while True:
-            out = ui.input("[bold]> [/bold]", console=console)
+            out = ui.input("[bold]> [/bold]")
             if out == "quit":
                 break
             
@@ -81,16 +81,16 @@ def chat(
                         response_started = True
                         print()  # Add whitespace after spinner
                         if config.DEBUG_MODE:
-                            ui.print("[magenta]>>> LLM Response:[/magenta]", console=console)
+                            ui.print("[magenta]>>> LLM Response:[/magenta]")
                             print()
                     response_chunks.append(chunk)
                 
                 # Stream the response with padding and wrapping
-                ui.stream(response_chunks, console=console)
+                ui.stream(response_chunks)
             print("\n")  # Add extra newline after bot response
     except KeyboardInterrupt:
         print("\n")  # Add newlines
-        ui.print("[cyan]Thanks for using Bespoken. Goodbye![/cyan]", console=console)
+        ui.print("[cyan]Thanks for using Bespoken. Goodbye![/cyan]")
         print()  # Add final newline
 
 

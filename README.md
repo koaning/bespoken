@@ -68,10 +68,6 @@ chat(
 )
 ```
 
-### Custom agents 
-
-The whole point of this library is to make it easy to make custom agents for different use-cases. You could, for example, have a few custom tools with a custom prompt and a bespoke LLM model for your use-case.
-
 ## Why? 
 
 The goal is to host a bunch of tools that you can pass to the LLM, but the main idea here is that you can also make it easy to constrain the chat. The `FileTool`, for example, only allows the LLM to make edits to a single file declared upfront. This significantly reduces any injection risks and still covers a lot of use-cases. It is also a nice exercize to make tools like claude code feel less magical, and you can also swap out the LLM with any other one as you see fit. 

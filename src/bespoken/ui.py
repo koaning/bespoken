@@ -4,17 +4,14 @@ from typing import List, Any, Optional
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 
-try:
-    from prompt_toolkit import prompt
-    from prompt_toolkit.completion import WordCompleter
-    from prompt_toolkit.styles import Style
-    from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-    from prompt_toolkit.history import InMemoryHistory
-    from prompt_toolkit.formatted_text import HTML
-    from .file_completer import create_completer
-    PROMPT_TOOLKIT_AVAILABLE = True
-except ImportError:
-    PROMPT_TOOLKIT_AVAILABLE = False
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import WordCompleter, FuzzyCompleter
+from prompt_toolkit.styles import Style
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.formatted_text import HTML
+import questionary
+from .file_completer import create_completer
 
 
 # Global padding configuration
@@ -43,7 +40,7 @@ _custom_subtitle = None
 _trusted_tools = set()
 
 # Command history for prompt_toolkit
-_command_history = InMemoryHistory() if PROMPT_TOOLKIT_AVAILABLE else None
+_command_history = InMemoryHistory()
 
 
 def print(text: str, indent: int = LEFT_PADDING) -> None:
@@ -120,39 +117,34 @@ def input(prompt_text: str, indent: int = LEFT_PADDING, completions: Optional[Li
     """Get input with left padding and optional completions."""
     padded_prompt = " " * indent + prompt_text
     
-    if completions and PROMPT_TOOLKIT_AVAILABLE:
-        # Use combined completer for commands and file paths
-        completer = create_completer(completions)
-        
-        if completer:
-            # Create a style with auto-suggestion preview in gray
-            style = Style.from_dict({
-                # Default text style
-                '': '#ffffff',
-                # Auto-suggestions in gray
-                'auto-suggest': 'fg:#666666',
-                # Selected completion in menu
-                'completion-menu.completion.current': 'bg:#00aaaa #000000',
-                'completion-menu.completion': 'bg:#008888 #ffffff',
-            })
-            
-            try:
-                # Use prompt_toolkit with completer and auto-suggestions
-                result = prompt(
-                    padded_prompt,
-                    completer=completer,
-                    style=style,
-                    complete_while_typing=True,  # Show completions as you type
-                    auto_suggest=AutoSuggestFromHistory(),  # Suggest from history
-                    history=_command_history,  # Enable history with up/down arrows
-                    enable_history_search=False,  # Disable Ctrl+R search
-                )
-                return result
-            except (KeyboardInterrupt, EOFError):
-                raise KeyboardInterrupt()
-    else:
-        # Fall back to Rich console input
-        return _console.input(padded_prompt)
+    # Use combined completer for commands and file paths
+    completer = create_completer(completions) if completions else None
+    
+    # Create a style with auto-suggestion preview in gray
+    style = Style.from_dict({
+        # Default text style
+        '': '#ffffff',
+        # Auto-suggestions in gray
+        'auto-suggest': 'fg:#666666',
+        # Selected completion in menu
+        'completion-menu.completion.current': 'bg:#00aaaa #000000',
+        'completion-menu.completion': 'bg:#008888 #ffffff',
+    })
+    
+    try:
+        # Use prompt_toolkit with completer and auto-suggestions
+        result = prompt(
+            padded_prompt,
+            completer=completer,
+            style=style,
+            complete_while_typing=True,  # Show completions as you type
+            auto_suggest=AutoSuggestFromHistory(),  # Suggest from history
+            history=_command_history,  # Enable history with up/down arrows
+            enable_history_search=False,  # Disable Ctrl+R search
+        )
+        return result
+    except (KeyboardInterrupt, EOFError):
+        raise KeyboardInterrupt()
 
 
 def confirm(prompt: str, indent: int = LEFT_PADDING, default: bool = True) -> bool:
@@ -162,11 +154,24 @@ def confirm(prompt: str, indent: int = LEFT_PADDING, default: bool = True) -> bo
     return Confirm.ask(padded_prompt, default=default, console=_console)
 
 
-def choice(prompt: str, choices: List[str], indent: int = LEFT_PADDING) -> str:
-    """Present a choice menu with left padding."""
+def choice(prompt_text: str, choices: List[str], indent: int = LEFT_PADDING) -> str:
+    """Present choices using questionary select."""
+    # Add blank line before the choice
+    print("")
+    
     # Add padding to the prompt
-    padded_prompt = " " * indent + prompt
-    return Prompt.ask(padded_prompt, choices=choices, console=_console)
+    padded_prompt = " " * indent + prompt_text
+    
+    try:
+        result = questionary.select(
+            padded_prompt,
+            choices=choices,
+            use_shortcuts=True,  # Allow number shortcuts
+            qmark=""  # Remove the question mark
+        ).ask()
+        return result or choices[0]  # Default to first choice if cancelled
+    except (KeyboardInterrupt, EOFError):
+        raise KeyboardInterrupt()
 
 
 def set_ascii_art(ascii_art: str, subtitle: str = None) -> None:

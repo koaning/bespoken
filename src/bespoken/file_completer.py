@@ -4,12 +4,8 @@ import os
 from pathlib import Path
 from typing import Iterable, List
 
-try:
-    from prompt_toolkit.completion import Completer, Completion
-    from prompt_toolkit.document import Document
-    PROMPT_TOOLKIT_AVAILABLE = True
-except ImportError:
-    PROMPT_TOOLKIT_AVAILABLE = False
+from prompt_toolkit.completion import Completer, Completion
+from prompt_toolkit.document import Document
 
 
 class FilePathCompleter(Completer):
@@ -144,7 +140,4 @@ class CombinedCompleter(Completer):
 
 def create_completer(commands: List[str], base_path: str = "."):
     """Create a combined completer for commands and file paths."""
-    if not PROMPT_TOOLKIT_AVAILABLE:
-        return None
-    
     return CombinedCompleter(commands, base_path)

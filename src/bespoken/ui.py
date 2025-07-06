@@ -11,6 +11,7 @@ try:
     from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
     from prompt_toolkit.history import InMemoryHistory
     from prompt_toolkit.formatted_text import HTML
+    from .file_completer import create_completer
     PROMPT_TOOLKIT_AVAILABLE = True
 except ImportError:
     PROMPT_TOOLKIT_AVAILABLE = False
@@ -120,34 +121,35 @@ def input(prompt_text: str, indent: int = LEFT_PADDING, completions: Optional[Li
     padded_prompt = " " * indent + prompt_text
     
     if completions and PROMPT_TOOLKIT_AVAILABLE:
-        # Use prompt_toolkit for better completion support
-        completer = WordCompleter(completions, ignore_case=True, match_middle=True)
+        # Use combined completer for commands and file paths
+        completer = create_completer(completions)
         
-        # Create a style with auto-suggestion preview in gray
-        style = Style.from_dict({
-            # Default text style
-            '': '#ffffff',
-            # Auto-suggestions in gray
-            'auto-suggest': 'fg:#666666',
-            # Selected completion in menu
-            'completion-menu.completion.current': 'bg:#00aaaa #000000',
-            'completion-menu.completion': 'bg:#008888 #ffffff',
-        })
-        
-        try:
-            # Use prompt_toolkit with completer and auto-suggestions
-            result = prompt(
-                padded_prompt,
-                completer=completer,
-                style=style,
-                complete_while_typing=True,  # Show completions as you type
-                auto_suggest=AutoSuggestFromHistory(),  # Suggest from history
-                history=_command_history,  # Enable history with up/down arrows
-                enable_history_search=False,  # Disable Ctrl+R search
-            )
-            return result
-        except (KeyboardInterrupt, EOFError):
-            raise KeyboardInterrupt()
+        if completer:
+            # Create a style with auto-suggestion preview in gray
+            style = Style.from_dict({
+                # Default text style
+                '': '#ffffff',
+                # Auto-suggestions in gray
+                'auto-suggest': 'fg:#666666',
+                # Selected completion in menu
+                'completion-menu.completion.current': 'bg:#00aaaa #000000',
+                'completion-menu.completion': 'bg:#008888 #ffffff',
+            })
+            
+            try:
+                # Use prompt_toolkit with completer and auto-suggestions
+                result = prompt(
+                    padded_prompt,
+                    completer=completer,
+                    style=style,
+                    complete_while_typing=True,  # Show completions as you type
+                    auto_suggest=AutoSuggestFromHistory(),  # Suggest from history
+                    history=_command_history,  # Enable history with up/down arrows
+                    enable_history_search=False,  # Disable Ctrl+R search
+                )
+                return result
+            except (KeyboardInterrupt, EOFError):
+                raise KeyboardInterrupt()
     else:
         # Fall back to Rich console input
         return _console.input(padded_prompt)

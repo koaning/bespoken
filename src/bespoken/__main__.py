@@ -57,7 +57,7 @@ def chat(
             
             # Show completion hint on first prompt if prompt_toolkit is available
             if not hasattr(chat, '_shown_completion_hint') and ui.PROMPT_TOOLKIT_AVAILABLE:
-                ui.print("[dim]Tips: TAB for completions • ↑/↓ for history • Start typing for suggestions[/dim]")
+                ui.print("[dim]Tips: TAB for completions • @file.py for file paths • ↑/↓ for history[/dim]")
                 chat._shown_completion_hint = True
             
             out = ui.input("> ", completions=completions)

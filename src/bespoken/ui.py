@@ -65,6 +65,47 @@ def print(text: str, indent: int = LEFT_PADDING) -> None:
         _console.print(" " * indent + line)
 
 
+def print_neutral(text: str, indent: int = LEFT_PADDING) -> None:
+    """Print text in neutral gray color with proper padding and wrapping."""
+    # Use the streaming infrastructure to handle padding correctly
+    start_streaming(indent)
+    stream_chunk(text, indent)
+    end_streaming(indent)
+    _console.print()  # Add newline after the text
+
+
+def tool_status(message: str, indent: int = LEFT_PADDING) -> None:
+    """Print a tool status message in cyan."""
+    _console.print()  # Add extra whitespace before tool message
+    _console.print(f"{' ' * indent}[cyan]{message}[/cyan]")
+    _console.print()
+
+
+def tool_debug(message: str, indent: int = LEFT_PADDING) -> None:
+    """Print a debug message in magenta (only when DEBUG_MODE is True)."""
+    from . import config
+    if config.DEBUG_MODE:
+        # Handle multiline messages by adding padding to each line
+        lines = message.split('\n')
+        for line in lines:
+            _console.print(f"{' ' * indent}[magenta]{line}[/magenta]")
+
+
+def tool_error(message: str, indent: int = LEFT_PADDING) -> None:
+    """Print an error message in red."""
+    _console.print(f"{' ' * indent}[red]{message}[/red]")
+
+
+def tool_success(message: str, indent: int = LEFT_PADDING) -> None:
+    """Print a success message in green."""
+    _console.print(f"{' ' * indent}[green]{message}[/green]")
+
+
+def tool_warning(message: str, indent: int = LEFT_PADDING) -> None:
+    """Print a warning message in yellow."""
+    _console.print(f"{' ' * indent}[yellow]{message}[/yellow]")
+
+
 def start_streaming(indent: int = LEFT_PADDING) -> None:
     """Initialize streaming state."""
     global _streaming_state

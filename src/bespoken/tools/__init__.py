@@ -3,7 +3,7 @@
 from .filesystem import FileSystem, FileTool
 from .todo import TodoTools
 from .webfetch import WebFetchTool
-from .not_installed import NotInstalled
+from ..not_installed import NotInstalled
 
 try:
     from .playwright_browser import PlaywrightTool

@@ -163,7 +163,7 @@ def chat(
                 ui.print("[dim]Tips: TAB for completions • @file.py for file paths • ↑/↓ for history • Ctrl+U to clear[/dim]")
                 chat._shown_completion_hint = True
             
-            out = ui.input("> ", completions=completions)
+            out = ui.input("> ", completions=completions).strip()
             
             # Handle slash commands
             if out.startswith("/"):
@@ -189,7 +189,6 @@ def chat(
             response_started = False
             
             with Live(padded_spinner, console=console, refresh_per_second=10) as live:
-                response_chunks = []
                 for chunk in conversation.chain(out, system=system_prompt):
                     if not response_started:
                         # First chunk received, stop the spinner
@@ -199,10 +198,15 @@ def chat(
                         if config.DEBUG_MODE:
                             ui.print("[magenta]>>> LLM Response:[/magenta]")
                             print()
-                    response_chunks.append(chunk)
+                        # Initialize streaming state
+                        ui.start_streaming()
+                    
+                    # Stream each chunk as it arrives
+                    ui.stream_chunk(chunk)
                 
-                # Stream the response with padding and wrapping
-                ui.stream(response_chunks)
+                # Finish streaming and print any remaining text
+                if response_started:
+                    ui.end_streaming()
             print("\n")  # Add extra newline after bot response
     except KeyboardInterrupt:
         print("\n")  # Add newlines

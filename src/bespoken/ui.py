@@ -42,6 +42,15 @@ _trusted_tools = set()
 # Command history for prompt_toolkit
 _command_history = InMemoryHistory()
 
+# Global streaming state
+_streaming_state = {
+    'current_position': 0,
+    'word_buffer': '',
+    'at_line_start': True,
+    'terminal_width': 0,
+    'max_line_width': 0
+}
+
 
 def print(text: str, indent: int = LEFT_PADDING) -> None:
     """Print text with left padding."""
@@ -54,6 +63,72 @@ def print(text: str, indent: int = LEFT_PADDING) -> None:
     lines = text.split('\n')
     for line in lines:
         _console.print(" " * indent + line)
+
+
+def start_streaming(indent: int = LEFT_PADDING) -> None:
+    """Initialize streaming state."""
+    global _streaming_state
+    _streaming_state['current_position'] = 0
+    _streaming_state['word_buffer'] = ''
+    _streaming_state['at_line_start'] = True
+    _streaming_state['terminal_width'] = _console.width
+    _streaming_state['max_line_width'] = _streaming_state['terminal_width'] - indent - RIGHT_PADDING
+
+
+def stream_chunk(chunk: str, indent: int = LEFT_PADDING, wrap: bool = True) -> None:
+    """Stream a single chunk while maintaining state."""
+    global _streaming_state
+    
+    # Process chunk character by character
+    for char in chunk:
+        if _streaming_state['at_line_start']:
+            # Add padding at start of line
+            _console.print(" " * indent, end="", highlight=False)
+            _streaming_state['at_line_start'] = False
+            _streaming_state['current_position'] = 0
+        
+        if char == '\n':
+            # Print any buffered word
+            if _streaming_state['word_buffer']:
+                _console.print(f"[dim]{_streaming_state['word_buffer']}[/dim]", end="", highlight=False)
+                _streaming_state['word_buffer'] = ""
+            # New line
+            _console.print()
+            _streaming_state['at_line_start'] = True
+        elif char in ' \t' and wrap:
+            # End of word, check if it fits
+            if _streaming_state['word_buffer']:
+                word_length = len(_streaming_state['word_buffer'])
+                if _streaming_state['current_position'] + word_length > _streaming_state['max_line_width']:
+                    # Word doesn't fit, wrap to new line
+                    _console.print()
+                    _streaming_state['at_line_start'] = True
+                    _console.print(" " * indent, end="", highlight=False)
+                    _streaming_state['current_position'] = 0
+                    _streaming_state['at_line_start'] = False
+                # Print the word
+                _console.print(f"[dim]{_streaming_state['word_buffer']}[/dim]", end="", highlight=False)
+                _streaming_state['current_position'] += word_length
+                _streaming_state['word_buffer'] = ""
+            # Print the space
+            _console.print(f"[dim]{char}[/dim]", end="", highlight=False)
+            _streaming_state['current_position'] += 1
+        else:
+            # Add to word buffer
+            _streaming_state['word_buffer'] += char
+
+
+def end_streaming(indent: int = LEFT_PADDING, wrap: bool = True) -> None:
+    """Finish streaming and print any remaining buffered word."""
+    global _streaming_state
+    
+    # Print any remaining buffered word
+    if _streaming_state['word_buffer']:
+        if wrap and _streaming_state['current_position'] + len(_streaming_state['word_buffer']) > _streaming_state['max_line_width']:
+            _console.print()
+            _streaming_state['at_line_start'] = True
+            _console.print(" " * indent, end="", highlight=False)
+        _console.print(f"[dim]{_streaming_state['word_buffer']}[/dim]", end="", highlight=False)
 
 
 def stream(chunks, indent: int = LEFT_PADDING, wrap: bool = True) -> None:

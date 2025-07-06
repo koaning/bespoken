@@ -18,9 +18,14 @@ from . import ui
 load_dotenv(".env")
 
 
+# Command result constants
+COMMAND_QUIT = "QUIT"
+COMMAND_HANDLED = "HANDLED"
+
+
 def handle_quit():
     """Handle /quit command"""
-    return "QUIT"
+    return COMMAND_QUIT
 
 
 def handle_help(user_commands):
@@ -43,7 +48,7 @@ def handle_help(user_commands):
                 ui.print(f"  {cmd_name}   - {preview}")
     
     ui.print("")
-    return "HANDLED"
+    return COMMAND_HANDLED
 
 
 
@@ -58,7 +63,7 @@ def handle_tools(tools):
     else:
         ui.print("[dim]No tools configured[/dim]")
     ui.print("")
-    return "HANDLED"
+    return COMMAND_HANDLED
 
 
 def toggle_debug():
@@ -67,7 +72,7 @@ def toggle_debug():
     status = "enabled" if config.DEBUG_MODE else "disabled"
     ui.print(f"[magenta]Debug mode {status}[/magenta]")
     ui.print("")
-    return "HANDLED"
+    return COMMAND_HANDLED
 
 
 def handle_user_command(command, handler):
@@ -84,20 +89,20 @@ def handle_user_command(command, handler):
                         # Treat as UI message
                         ui.print(result)
                         ui.print("")
-                        return "HANDLED"
+                        return COMMAND_HANDLED
                 else:
                     ui.print(str(result))
                     ui.print("")
-                    return "HANDLED"
+                    return COMMAND_HANDLED
             else:
-                return "HANDLED"
+                return COMMAND_HANDLED
         else:
             # String - send directly to LLM
             return str(handler)
     except Exception as e:
         ui.print(f"[red]Error executing command {command}: {e}[/red]")
         ui.print("")
-        return "HANDLED"
+        return COMMAND_HANDLED
 
 
 def dispatch_slash_command(command, user_commands, model, tools, conversation):
@@ -116,7 +121,7 @@ def dispatch_slash_command(command, user_commands, model, tools, conversation):
         ui.print(f"[red]Unknown command: {command}[/red]")
         ui.print("[dim]Type /help for available commands[/dim]")
         ui.print("")
-        return "HANDLED", conversation
+        return COMMAND_HANDLED, conversation
 
 
 def chat(
@@ -165,17 +170,21 @@ def chat(
             
             out = ui.input("> ", completions=completions).strip()
             
-            # Handle slash commands
+            # Handle slash commands (only if it's a known command)
             if out.startswith("/"):
-                result, conversation = dispatch_slash_command(out, user_commands, model, tools, conversation)
-                
-                if result == "QUIT":
-                    break
-                elif result == "HANDLED":
-                    continue
-                else:
-                    # Command returned text for LLM
-                    out = result
+                # Check if it's a known command
+                builtin_commands = ["/quit", "/help", "/tools", "/debug"]
+                if out in builtin_commands or out in user_commands:
+                    result, conversation = dispatch_slash_command(out, user_commands, model, tools, conversation)
+                    
+                    if result == COMMAND_QUIT:
+                        break
+                    elif result == COMMAND_HANDLED:
+                        continue
+                    else:
+                        # Command returned text for LLM
+                        out = result
+                # If it starts with / but isn't a known command, treat as regular text
             
             # Skip empty input
             if not out.strip():

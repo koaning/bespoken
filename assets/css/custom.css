@@ -1,0 +1,249 @@
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('../fonts/DepartureMono.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  /* Terminal-like color scheme */
+  --terminal-bg: #1e1e2e;
+  --terminal-text: #cdd6f4;
+  --terminal-code-bg: #181825;
+  --terminal-accent: #4ec9b0; /* Minty green terminal color */
+  --terminal-links: #569cd6; /* Blue for links */
+  --terminal-headers: #4ec9b0;
+  --terminal-subheaders: #569cd6;
+  --terminal-nav-bg: #252526;
+  --terminal-selection: rgba(78, 201, 176, 0.3);
+  
+  /* Override mkdocs material variables */
+  --md-default-bg-color: var(--terminal-bg);
+  --md-default-fg-color: var(--terminal-text);
+  --md-code-bg-color: var(--terminal-code-bg);
+  --md-code-fg-color: var(--terminal-text);
+  --md-accent-fg-color: var(--terminal-accent);
+  --md-primary-fg-color: var(--terminal-accent);
+  --md-primary-fg-color--light: var(--terminal-accent);
+  --md-primary-fg-color--dark: var(--terminal-accent);
+  --md-typeset-a-color: var(--terminal-links);
+  --md-primary-bg-color: var(--terminal-text);
+  --md-accent-bg-color: var(--terminal-text);
+}
+
+/* Basic elements */
+body {
+  font-family: 'JetBrains Mono', 'Departure Mono', monospace;
+  background-color: var(--terminal-bg);
+  color: var(--terminal-text);
+}
+
+/* Code blocks and inline code */
+pre, code {
+  font-family: 'JetBrains Mono', 'Departure Mono', monospace !important;
+  border-radius: 0 !important;
+  background-color: #1e1e1e !important;  /* VS Code dark theme background */
+  color: #d4d4d4 !important;  /* Light gray text */
+  text-shadow: none !important;
+  line-height: 1.5 !important;
+}
+
+/* Code block container */
+.highlight {
+  position: relative;
+  margin: 1em 0;
+  border: 1px solid #404040;
+}
+
+/* Code block content */
+.highlight pre {
+  margin: 0;
+  padding: 1em;
+  overflow-x: auto;
+}
+
+/* Copy button */
+.highlight .md-clipboard {
+  color: #858585 !important;
+  opacity: 1 !important;
+  transition: color 0.2s ease;
+  right: 0.5em !important;
+  top: 0.5em !important;
+  width: 1.8em;
+  height: 1.8em;
+  border-radius: 0.2em;
+  background-color: #2d2d2d !important;
+  border: 1px solid #404040 !important;
+}
+
+.highlight .md-clipboard:hover {
+  color: #ffffff !important;
+  background-color: #0e639c !important;
+  border-color: #0078d4 !important;
+}
+
+.highlight .md-clipboard::before {
+  font-size: 1.1em;
+  margin: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Syntax highlighting - VS Code Dark+ theme */
+.highlight .p, .highlight .o { color: #d4d4d4; }  /* Punctuation, operators */
+.highlight .k, .highlight .kd { color: #c586c0; }  /* Keywords */
+.highlight .kt { color: #4ec9b0; }  /* Keyword types */
+.highlight .s, .highlight .s1, .highlight .s2, 
+.highlight .sd, .highlight .sb, .highlight .sh, 
+.highlight .sx, .highlight .sr, .highlight .ss, 
+.highlight .si, .highlight .se, .highlight .dl {
+  color: #ffa07a !important;  /* Brighter salmon color for better visibility */
+  text-shadow: 0 0 2px rgba(255, 160, 122, 0.3);
+}
+
+/* Multi-line strings and docstrings */
+.highlight .s2, .highlight .sd {
+  color: #f8c9b3 !important;  /* Even brighter for docstrings */
+}
+
+/* String interpolation */
+.highlight .si {
+  color: #ffcc99 !important;
+}
+
+/* String escape sequences */
+.highlight .se {
+  color: #ffaa80 !important;
+  font-weight: bold;
+}
+
+.highlight .mi, .highlight .mf, .highlight .mh, .highlight .mo, .highlight .m { color: #b5cea8; }  /* Numbers */
+.highlight .c, .highlight .cm, .highlight .c1 { color: #6a9955; font-style: italic; }  /* Comments */
+.highlight .nf, .highlight .na { color: #dcdcaa; }  /* Functions */
+.highlight .nc, .highlight .nn { color: #4ec9b0; }  /* Classes */
+.highlight .nb { color: #9cdcfe; }  /* Built-ins */
+.highlight .nd { color: #dcdcaa; }  /* Decorators */
+.highlight .ni { color: #d4d4d4; }  /* Namespace */
+.highlight .ne { color: #569cd6; }  /* Exceptions */
+.highlight .nl { color: #9cdcfe; }  /* Labels */
+.highlight .bp { color: #9cdcfe; }  /* Built-in pseudo */
+.highlight .vc, .highlight .vg, .highlight .vi { color: #9cdcfe; }  /* Variables */
+.highlight .il { color: #b5cea8; }  /* Literal numbers */
+
+/* Line numbers */
+.highlight .lineno { color: #858585; margin-right: 1em; user-select: none; }
+.highlight .lineno::selection { background-color: transparent; }
+
+/* Selection within code blocks */
+.highlight ::selection {
+  background-color: #264f78;
+  color: inherit;
+}
+
+/* Inline code */
+:not(pre) > code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(110, 118, 129, 0.4) !important;
+  border-radius: 3px;
+  color: #e5c07b !important;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--terminal-selection);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--terminal-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--terminal-accent);
+  border-radius: 0;
+}
+
+/* MkDocs overrides */
+.md-typeset {
+  font-family: 'JetBrains Mono', 'Departure Mono', monospace;
+}
+
+.md-typeset code {
+  font-family: 'JetBrains Mono', 'Departure Mono', monospace;
+}
+
+.md-header {
+  background-color: var(--terminal-nav-bg) !important;
+  color: var(--terminal-text);
+  box-shadow: none !important;
+}
+
+.md-tabs {
+  background-color: var(--terminal-nav-bg) !important;
+}
+
+.md-tabs__link {
+  opacity: 0.7;
+}
+
+.md-tabs__link--active,
+.md-tabs__link:hover {
+  color: var(--terminal-accent) !important;
+  opacity: 1;
+}
+
+.md-nav {
+  background-color: var(--terminal-bg);
+}
+
+.md-nav__title {
+  color: var(--terminal-accent);
+  background-color: var(--terminal-nav-bg) !important;
+}
+
+.md-typeset h1, .md-typeset h2 {
+  color: var(--terminal-headers);
+  font-weight: bold;
+}
+
+.md-typeset h3, .md-typeset h4, .md-typeset h5, .md-typeset h6 {
+  color: var(--terminal-subheaders) !important;
+  font-weight: 500;
+}
+
+/* Links styling */
+.md-typeset a {
+  color: var(--terminal-links) !important;
+  text-decoration: none !important;
+  border-bottom: 1px dotted var(--terminal-links);
+}
+
+.md-typeset a:hover {
+  color: var(--terminal-accent) !important;
+  border-bottom: 1px solid var(--terminal-accent);
+}
+
+/* Blockquotes styling */
+.md-typeset blockquote {
+  color: var(--terminal-text) !important;
+  background-color: rgba(78, 201, 176, 0.1) !important;
+  border-left: 4px solid var(--terminal-accent) !important;
+  padding: 1em 1.5em !important;
+  margin: 1.5em 0 !important;
+  font-style: normal !important;
+}
+
+.md-typeset blockquote p {
+  color: var(--terminal-text) !important;
+  opacity: 0.9;
+}
+
+

@@ -29,8 +29,10 @@ _DEFAULT_ASCII_ART = """██████╗ ███████╗███�
 ██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
 ╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝"""
 
-_DEFAULT_SUBTITLE = """[dim]A terminal chat experience that you can configure yourself.[/dim]
-[cyan]Type 'quit' to exit.[/cyan]"""
+# Import version from package
+from . import __version__
+
+_DEFAULT_SUBTITLE = f"""[dim]bespoken v{__version__} - A terminal chat experience that you can configure yourself.[/dim]"""
 
 # Custom ASCII art storage
 _custom_ascii_art = None

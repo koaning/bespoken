@@ -32,21 +32,16 @@ markdown_extensions:
   - md_in_html
 
 nav:
-  - Start: index.md
-  - Core Concepts:
-    - Overview: concepts/overview.md
-    - Tools: concepts/tools.md
-    - Slash Commands: concepts/slash-commands.md
-    - UI Components: concepts/ui-components.md
+  - index.md
   - Examples:
-    - Building a CLI Agent: tutorials/cli-agent.md
-    - Creating Custom Tools: tutorials/custom-tools.md
-    - Working with LLMs: tutorials/working-with-llms.md
+    - Quickstart: guides/quick-start.md
   - API:
-    - Tools: api/tools.md
-    - UI Components: api/ui.md
-    - Prompts: api/prompts.md
+    - tools: api/tools.md
+    - ui: api/ui.md
+    - prompts: api/prompts.md
+    - commands: api/slash-commands.md
 
 extra_css:
+  - https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap
   - https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css
   - assets/css/custom.css

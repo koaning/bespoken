@@ -5,10 +5,9 @@ from pathlib import Path
 import difflib
 import re
 import llm
-from rich import print, get_console
+from rich import get_console
 from rich.prompt import Confirm, Prompt
 
-from .. import config
 from .. import ui
 
 
@@ -20,7 +19,7 @@ class FileSystem(llm.Toolbox):
     
     def _debug_return(self, value: str) -> str:
         """Helper to show what the LLM receives from tools"""
-        config.tool_debug(f"\n>>> Tool returning to LLM: {repr(value)}\n")
+        ui.tool_debug(f"\n>>> Tool returning to LLM: {repr(value)}\n")
         return value
         
     def _resolve_path(self, file_path: str) -> Path:
@@ -30,8 +29,8 @@ class FileSystem(llm.Toolbox):
     
     def list_files(self, directory: Optional[str] = None) -> str:
         """List files and directories."""
-        config.tool_debug(f">>> LLM calling tool: list_files(directory={repr(directory)})")
-        config.tool_status(f"Listing files in {directory or 'current directory'}...")
+        ui.tool_debug(f">>> LLM calling tool: list_files(directory={repr(directory)})")
+        ui.tool_status(f"Listing files in {directory or 'current directory'}...")
         target_dir = self._resolve_path(directory) if directory else self.working_directory
         
         items = []
@@ -45,8 +44,8 @@ class FileSystem(llm.Toolbox):
     
     def read_file(self, file_path: str) -> str:
         """Read content from a file."""
-        config.tool_debug(f">>> LLM calling tool: read_file(file_path={repr(file_path)})")
-        config.tool_status(f"Reading file: {file_path}")
+        ui.tool_debug(f">>> LLM calling tool: read_file(file_path={repr(file_path)})")
+        ui.tool_status(f"Reading file: {file_path}")
         full_path = self._resolve_path(file_path)
         content = full_path.read_text(encoding='utf-8', errors='replace')
         
@@ -57,8 +56,8 @@ class FileSystem(llm.Toolbox):
     
     def write_file(self, file_path: str, content: str) -> str:
         """Write content to a file."""
-        config.tool_debug(f">>> LLM calling tool: write_file(file_path={repr(file_path)}, content=<{len(content)} chars>)")
-        config.tool_status(f"Writing {len(content):,} characters to: {file_path}")
+        ui.tool_debug(f">>> LLM calling tool: write_file(file_path={repr(file_path)}, content=<{len(content)} chars>)")
+        ui.tool_status(f"Writing {len(content):,} characters to: {file_path}")
         full_path = self._resolve_path(file_path)
         full_path.parent.mkdir(parents=True, exist_ok=True)
         full_path.write_text(content, encoding='utf-8')
@@ -67,8 +66,8 @@ class FileSystem(llm.Toolbox):
     
     def replace_in_file(self, file_path: str, old_string: str, new_string: str) -> str:
         """Replace string in file and show diff. The user may deny the change, in which case you should wait for new instructions."""
-        config.tool_debug(f">>> LLM calling tool: replace_in_file(file_path={repr(file_path)}, old_string=<{len(old_string)} chars>, new_string=<{len(new_string)} chars>)")
-        config.tool_status(f"Preparing to replace text in: {file_path}")
+        ui.tool_debug(f">>> LLM calling tool: replace_in_file(file_path={repr(file_path)}, old_string=<{len(old_string)} chars>, new_string=<{len(new_string)} chars>)")
+        ui.tool_status(f"Preparing to replace text in: {file_path}")
         full_path = self._resolve_path(file_path)
         original_content = full_path.read_text(encoding='utf-8')
         new_content = original_content.replace(old_string, new_string)
@@ -83,8 +82,8 @@ class FileSystem(llm.Toolbox):
         
         if diff_lines:
             # Show the diff with custom formatting
-            config.tool_warning("Proposed changes:")
-            print()
+            ui.tool_warning("Proposed changes:")
+            ui.print()
             
             # Parse the diff to add line numbers and colors
             line_num_old = 0
@@ -118,10 +117,10 @@ class FileSystem(llm.Toolbox):
                     # Other lines (shouldn't happen in unified diff)
                     ui.print(line.rstrip())
             
-            print()  # Extra newline for clarity
+            ui.print("")  # Extra newline for clarity
             
             # Ask for confirmation
-            get_console().print()  # Force flush any pending output
+            ui.print_empty_line()  # Empty line for clarity
             confirm = ui.confirm(
                 "Apply these changes?", 
                 default=True
@@ -131,7 +130,7 @@ class FileSystem(llm.Toolbox):
                 full_path.write_text(new_content, encoding='utf-8')
                 return self._debug_return(f"Applied changes to '{file_path}'")
             else:
-                config.tool_error("Changes cancelled. Please provide new instructions.")
+                ui.tool_error("Changes cancelled. Please provide new instructions.")
                 return self._debug_return("IMPORTANT: The user declined the changes. Do not continue with the task. Wait for new instructions from the user. IMPORTANT: Do not continue with the task.")
         else:
             return self._debug_return(f"No changes needed in '{file_path}'")
@@ -154,19 +153,19 @@ def FileTool(file_path: Optional[str] = None):
         
         def _debug_return(self, value: str) -> str:
             """Helper to show what the LLM receives from tools"""
-            config.tool_debug(f"\n>>> Tool returning to LLM: {value}\n")
+            ui.tool_debug(f"\n>>> Tool returning to LLM: {value}\n")
             return value
         
         def get_file_path(self) -> str:
             """Return the path to the file that this tool is allowed to edit."""
-            config.tool_debug(">>> LLM calling tool: get_file_path()")
-            config.tool_status(f"Getting file path for: {self.file_path.name}")
+            ui.tool_debug(">>> LLM calling tool: get_file_path()")
+            ui.tool_status(f"Getting file path for: {self.file_path.name}")
             return self._debug_return(f"This tool can only access one file: {self.file_path}. Other files exist but are not accessible through this tool.")
         
         def read_file(self) -> str:
             f"""Read the content of {self.file_path.name}. This tool cannot be used to open or edit other files."""
-            config.tool_debug(">>> LLM calling tool: read_file()")
-            config.tool_status(f"Reading file: {self.file_path.name}")
+            ui.tool_debug(">>> LLM calling tool: read_file()")
+            ui.tool_status(f"Reading file: {self.file_path.name}")
             
             content = self.file_path.read_text(encoding='utf-8', errors='replace')
             
@@ -177,8 +176,8 @@ def FileTool(file_path: Optional[str] = None):
         
         def replace_in_file(self, old_string: str, new_string: str) -> str:
             f"""Replace string in {self.file_path.name} and show diff. The user may deny the change, in which case you should wait for new instructions. This tool cannot be used to open or edit other files."""
-            config.tool_debug(f">>> LLM calling tool: replace_in_file(old_string=<{len(old_string)} chars>, new_string=<{len(new_string)} chars>)")
-            config.tool_status(f"Preparing to replace text in: {self.file_path.name}")
+            ui.tool_debug(f">>> LLM calling tool: replace_in_file(old_string=<{len(old_string)} chars>, new_string=<{len(new_string)} chars>)")
+            ui.tool_status(f"Preparing to replace text in: {self.file_path.name}")
             
             original_content = self.file_path.read_text(encoding='utf-8')
             new_content = original_content.replace(old_string, new_string)
@@ -193,8 +192,8 @@ def FileTool(file_path: Optional[str] = None):
             
             if diff_lines:
                 # Show the diff with custom formatting
-                config.tool_warning("Proposed changes:")
-                print()
+                ui.tool_warning("Proposed changes:")
+                ui.print_empty_line()
                 
                 # Parse the diff to add line numbers and colors
                 line_num_old = 0
@@ -228,10 +227,10 @@ def FileTool(file_path: Optional[str] = None):
                         # Other lines (shouldn't happen in unified diff)
                         ui.print(line.rstrip())
                 
-                print()  # Extra newline for clarity
+                ui.print("")  # Extra newline for clarity
                 
                 # Ask for confirmation
-                get_console().print()  # Force flush any pending output
+                ui.print_empty_line()  # Empty line for clarity
                 confirm = ui.confirm(
                     "Apply these changes?", 
                     default=True
@@ -241,7 +240,7 @@ def FileTool(file_path: Optional[str] = None):
                     self.file_path.write_text(new_content, encoding='utf-8')
                     return self._debug_return(f"Applied changes to '{self.file_path.name}'")
                 else:
-                    config.tool_error("Changes cancelled. Please provide new instructions.")
+                    ui.tool_error("Changes cancelled. Please provide new instructions.")
                     return self._debug_return("IMPORTANT: The user declined the changes. Do not continue with the task. Wait for new instructions from the user. IMPORTANT: Do not continue with the task.")
             else:
                 return self._debug_return(f"No changes needed in '{self.file_path.name}'")

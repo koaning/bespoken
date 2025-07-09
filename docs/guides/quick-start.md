@@ -1,39 +1,26 @@
-# Quick Start
+## Quickstart
 
-## Basic Setup
+This is the simplest quickstart for an agent that can only make changes to a Python file.
 
-```bash
-# Create a new environment
-uv venv .venv
-
-# Activate the environment
-source .venv/bin/activate  # On Unix/macOS
-# or
-.venv\Scripts\activate  # On Windows
-
-# Install bespoken
-uv install bespoken
-```
-
-## Simple Example
-
-Create a file called `simple_chat.py`:
-
-```python
+```python title="app.py"
 from bespoken import chat
 from bespoken.tools import FileTool
-from pathlib import Path  # Using pathlib instead of os.path
+from bespoken import ui
 
-# Simple chat with file access tool
+def set_role():
+    """Set a voice for the assistant"""
+    roles = ["pirate", "teacher", "professor"]
+    role = ui.choice("What role should I take?", roles)
+    return f"You are now speaking like a {role}. Please respond in character for this role."
+
 chat(
     model_name="anthropic/claude-3-5-sonnet-20240620",
-    tools=[FileTool(".")],
-    system_prompt="You are a helpful assistant."
+    tools=[FileTool("edit.py")],
+    system_prompt="You are a helpful assistant.",
+    debug=False,
+    slash_commands={
+        "/role": set_role,
+    }
 )
 ```
 
-Run your script:
-
-```bash
-python simple_chat.py
-```

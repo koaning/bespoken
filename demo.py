@@ -1,54 +1,16 @@
-# /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#     "marimo",
-#     "numpy==2.3.1",
-# ]
-# ///
+from bespoken import ui
+from bespoken.tools.filesystem import FileTool
+from bespoken.config import DEBUG_MODE
 
-import marimo
+ui.print("Hello, World!")
+ui.print_empty_line()
+fs = FileTool("demo.py")
+ui.print_empty_line()
 
-__generated_with = "0.14.10"
-app = marimo.App(width="columns")
-
-
-@app.cell
-def _():
-    import marimo as mo
-    import numpy as np
-    return mo, np
-
-
-@app.cell
-def _():
-    a = 1 
-    return (a,)
-
-
-@app.cell
-def _():
-    b = 2
-    return (b,)
-
-
-@app.cell
-def _(a, b, np, slider):
-    c = a + b + slider.value
-    np.arange(c)
-    return
-
-
-@app.cell
-def _(mo):
-    slider = mo.ui.slider(1, 10, 1)
-    slider
-    return (slider,)
-
-
-@app.cell
-def _():
-    return
-
-
-if __name__ == "__main__":
-    app.run()
+fs.read_file()
+ui.start_streaming()
+ui.stream("yes this is so important")
+ui.end_streaming()
+ui.start_streaming()
+ui.stream("yes this is so important")
+ui.end_streaming()

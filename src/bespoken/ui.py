@@ -29,10 +29,16 @@ _DEFAULT_ASCII_ART = """██████╗ ███████╗███�
 ██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
 ╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝"""
 
-# Import version from package
-from . import __version__
+# Get version dynamically to avoid circular import
+def _get_version():
+    """Get version without circular import."""
+    try:
+        import importlib.metadata
+        return importlib.metadata.version("bespoken")
+    except:
+        return "unknown"
 
-_DEFAULT_SUBTITLE = f"""[dim]bespoken v{__version__} - A terminal chat experience that you can configure yourself.[/dim]"""
+_DEFAULT_SUBTITLE = f"""[dim]bespoken v{_get_version()} - A terminal chat experience that you can configure yourself.[/dim]"""
 
 # Custom ASCII art storage
 _custom_ascii_art = None
@@ -67,13 +73,18 @@ def print(text: str, indent: int = LEFT_PADDING) -> None:
         _console.print(" " * indent + line)
 
 
+def print_empty_line(indent: int = LEFT_PADDING) -> None:
+    """Print an empty line with padding to maintain consistent left margin."""
+    _console.print(" " * indent)
+
+
 def print_neutral(text: str, indent: int = LEFT_PADDING) -> None:
     """Print text in neutral gray color with proper padding and wrapping."""
     # Use the streaming infrastructure to handle padding correctly
     start_streaming(indent)
     stream_chunk(text, indent)
     end_streaming(indent)
-    _console.print()  # Add newline after the text
+    print_empty_line(indent)  # Add newline after the text with padding
 
 
 def tool_status(message: str, indent: int = LEFT_PADDING) -> None:
@@ -346,16 +357,16 @@ def confirm_tool_action(tool_name: str, action_description: str, details: dict =
     """Confirm a tool action, respecting trust settings."""
     # If tool is trusted, auto-confirm
     if is_tool_trusted(tool_name):
-        print(f"[dim]Auto-executing trusted tool: {tool_name}[/dim]")
+        _console.print(f"{' ' * LEFT_PADDING}[dim]Auto-executing trusted tool: {tool_name}[/dim]")
         return True
     
     # Otherwise, show details and ask for confirmation
-    print(f"[bold yellow]Tool: {tool_name}[/bold yellow]")
-    print(f"[bold]Action:[/bold] {action_description}")
+    _console.print(f"{' ' * LEFT_PADDING}[bold yellow]Tool: {tool_name}[/bold yellow]")
+    _console.print(f"{' ' * LEFT_PADDING}[bold]Action:[/bold] {action_description}")
     
     if details:
         for key, value in details.items():
             if value:  # Only show non-empty values
-                print(f"[bold]{key}:[/bold] {value}")
+                _console.print(f"{' ' * LEFT_PADDING}[bold]{key}:[/bold] {value}")
     
     return confirm(f"Execute this {tool_name} action?", default=default)

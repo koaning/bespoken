@@ -3,7 +3,6 @@ from typing import Optional
 import llm
 import typer
 from dotenv import load_dotenv
-from rich import print
 from rich.console import Console
 from rich.spinner import Spinner
 from rich.live import Live
@@ -145,7 +144,7 @@ def chat(
     
     if debug:
         ui.print("[magenta]Debug mode enabled[/magenta]")
-        print()
+        ui.print("")
     
     
     try:
@@ -190,7 +189,7 @@ def chat(
             if not out.strip():
                 continue
             
-            print()  # Add whitespace before thinking spinner
+            ui.print("")  # Add whitespace before thinking spinner
             # Show spinner while getting initial response
             # Create a padded spinner
             spinner_text = Text("Thinking...", style="dim")
@@ -203,24 +202,24 @@ def chat(
                         # First chunk received, stop the spinner
                         live.stop()
                         response_started = True
-                        print()  # Add whitespace after spinner
+                        ui.print("")  # Add whitespace after spinner
                         if config.DEBUG_MODE:
                             ui.print("[magenta]>>> LLM Response:[/magenta]")
-                            print()
+                            ui.print("")
                         # Initialize streaming state
-                        ui.start_streaming()
+                        ui.start_streaming(ui.LEFT_PADDING)
                     
                     # Stream each chunk as it arrives
-                    ui.stream_chunk(chunk)
+                    ui.stream_chunk(chunk, ui.LEFT_PADDING)
                 
                 # Finish streaming and print any remaining text
                 if response_started:
-                    ui.end_streaming()
-            print("\n")  # Add extra newline after bot response
+                    ui.end_streaming(ui.LEFT_PADDING)
+            ui.print("")  # Add extra newline after bot response
     except KeyboardInterrupt:
-        print("\n")  # Add newlines
+        ui.print("")  # Add newlines
         ui.print("[cyan]Thanks for using Bespoken. Goodbye![/cyan]")
-        print()  # Add final newline
+        ui.print("")  # Add final newline
 
 
 def main():

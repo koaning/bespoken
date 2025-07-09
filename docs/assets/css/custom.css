@@ -33,14 +33,14 @@
 
 /* Basic elements */
 body {
-  font-family: 'Departure Mono', monospace;
+  font-family: 'JetBrains Mono', 'Departure Mono', monospace;
   background-color: var(--terminal-bg);
   color: var(--terminal-text);
 }
 
 /* Code blocks and inline code */
 pre, code {
-  font-family: 'Departure Mono', monospace !important;
+  font-family: 'JetBrains Mono', 'Departure Mono', monospace !important;
   border-radius: 0 !important;
   background-color: #1e1e1e !important;  /* VS Code dark theme background */
   color: #d4d4d4 !important;  /* Light gray text */
@@ -173,11 +173,11 @@ pre, code {
 
 /* MkDocs overrides */
 .md-typeset {
-  font-family: 'Departure Mono', monospace;
+  font-family: 'JetBrains Mono', 'Departure Mono', monospace;
 }
 
 .md-typeset code {
-  font-family: 'Departure Mono', monospace;
+  font-family: 'JetBrains Mono', 'Departure Mono', monospace;
 }
 
 .md-header {
@@ -231,18 +231,19 @@ pre, code {
   border-bottom: 1px solid var(--terminal-accent);
 }
 
-
-/* Blinking cursor effect for h1 headings only */
-.md-typeset h1::after {
-  content: '▊';
-  display: inline-block;
-  color: var(--terminal-accent);
-  animation: blink 1s step-end infinite;
-  margin-left: 0.25em;
-  font-weight: normal;
+/* Blockquotes styling */
+.md-typeset blockquote {
+  color: var(--terminal-text) !important;
+  background-color: rgba(78, 201, 176, 0.1) !important;
+  border-left: 4px solid var(--terminal-accent) !important;
+  padding: 1em 1.5em !important;
+  margin: 1.5em 0 !important;
+  font-style: normal !important;
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.md-typeset blockquote p {
+  color: var(--terminal-text) !important;
+  opacity: 0.9;
 }
+
+

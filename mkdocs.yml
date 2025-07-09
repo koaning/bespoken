@@ -1,0 +1,52 @@
+site_name: Bespoken
+site_description: A framework for creating constrained LLM applications
+site_author: Bespoken Team
+
+repo_url: https://github.com/koaning/bespoken
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  icon:
+    logo: octicons/terminal-16
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.sections
+    - content.code.copy
+    - content.code.annotate
+  
+  # Use our CSS instead of theme palettes
+  palette: {}
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Start: index.md
+  - Core Concepts:
+    - Overview: concepts/overview.md
+    - Tools: concepts/tools.md
+    - Slash Commands: concepts/slash-commands.md
+    - UI Components: concepts/ui-components.md
+  - Examples:
+    - Building a CLI Agent: tutorials/cli-agent.md
+    - Creating Custom Tools: tutorials/custom-tools.md
+    - Working with LLMs: tutorials/working-with-llms.md
+  - API:
+    - Tools: api/tools.md
+    - UI Components: api/ui.md
+    - Prompts: api/prompts.md
+
+extra_css:
+  - https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css
+  - assets/css/custom.css

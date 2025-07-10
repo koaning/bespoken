@@ -1,5 +1,6 @@
 from textual.app import App, ComposeResult
-from textual.widgets import Input
+from textual.widgets import Input, Static, Label
+from textual.containers import Container, VerticalScroll, Horizontal
 from textual.events import Key
 from pathlib import Path
 import os
@@ -70,11 +71,56 @@ class CustomAutoComplete(AutoComplete):
             self.call_after_refresh(self._handle_target_update)
 
 class DynamicDataApp(App[None]):
+    CSS = """
+    #output-container {
+        height: 1fr;
+        padding: 1;
+        align-vertical: bottom;
+    }
+    
+    #input-container {
+        height: 3;
+        dock: bottom;
+    }
+    
+    Input {
+        dock: bottom;
+    }
+    
+    #prompt-label {
+        width: 2;
+        content-align: center middle;
+        color: $primary;
+    }
+    
+    Horizontal {
+        height: 3;
+    }
+    
+    .user-message {
+        color: $primary;
+        margin-bottom: 1;
+    }
+    
+    .bot-message {
+        color: $success;
+        margin-bottom: 1;
+    }
+    """
+    
     def compose(self) -> ComposeResult:
-        input_widget = Input()
-        yield input_widget
-        self.autocomplete = CustomAutoComplete(input_widget, candidates=self.candidates_callback)
-        yield self.autocomplete
+        # Output area at the top
+        with VerticalScroll(id="output-container"):
+            pass  # Start empty, welcome message will be added in on_mount
+        
+        # Input area at the bottom
+        with Container(id="input-container"):
+            with Horizontal():
+                yield Label(">", id="prompt-label")
+                input_widget = Input(placeholder="Type @ for files, / for commands...", id="chat-input")
+                yield input_widget
+                self.autocomplete = CustomAutoComplete(input_widget, candidates=self.candidates_callback)
+                yield self.autocomplete
 
     def candidates_callback(self, state: TargetState) -> list[DropdownItem]:
         # Get the current word at cursor position
@@ -160,6 +206,33 @@ class DynamicDataApp(App[None]):
         except (OSError, PermissionError):
             return []
 
+    def on_mount(self) -> None:
+        """Focus the input when the app starts"""
+        # Add welcome message
+        output_container = self.query_one("#output-container")
+        output_container.mount(Static("Welcome! Try typing @ for files or / for commands", classes="bot-message"))
+        
+        # Focus the input
+        self.query_one("#chat-input").focus()
+    
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Handle when user presses Enter"""
+        if not event.value:
+            return
+        
+        # Add user message
+        output_container = self.query_one("#output-container")
+        output_container.mount(Static(f"You: {event.value}", classes="user-message"))
+        
+        # Add bot echo response
+        output_container.mount(Static(f"Bot: {event.value}", classes="bot-message"))
+        
+        # Clear input
+        event.input.value = ""
+        
+        # Scroll to bottom
+        output_container.scroll_end()
+    
     def on_key(self, event: Key) -> None:
         # Handle Ctrl+C to quit
         if event.key == "ctrl+c":

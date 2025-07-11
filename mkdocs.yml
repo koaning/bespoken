@@ -35,11 +35,6 @@ nav:
   - index.md
   - Examples:
     - Quickstart: guides/quick-start.md
-  - API:
-    - tools: api/tools.md
-    - ui: api/ui.md
-    - prompts: api/prompts.md
-    - commands: api/slash-commands.md
 
 extra_css:
   - https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap

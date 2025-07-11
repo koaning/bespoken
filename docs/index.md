@@ -62,18 +62,18 @@ hide:
         }
     }
 </style>
-<div class="container">
-        <pre class="ascii-logo" style="color: whitesmoke !important; background-color: transparent !important; font-family: monospace !important; line-height: 1.0 !important;">
+<div class="container" style="text-align: center;">
+    <pre class="ascii-logo" style="color: whitesmoke !important; background-color: transparent !important; font-family: monospace !important; line-height: 1.0 !important; display: inline-block; text-align: left;">
 
-            ██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
-            ██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
-            ██████╔╝█████╗  ███████╗██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
-            ██╔══██╗██╔══╝  ╚════██║██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
-            ██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
-            ╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+    ██████╗ ███████╗███████╗██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗
+    ██╔══██╗██╔════╝██╔════╝██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
+    ██████╔╝█████╗  ███████╗██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
+    ██╔══██╗██╔══╝  ╚════██║██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
+    ██████╔╝███████╗███████║██║     ╚██████╔╝██║  ██╗███████╗██║ ╚████║
+    ╚═════╝ ╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
 
-            Define your agent. Pick your tools. Add your commands. Make it your own.
-        </pre>
+   Define your agent. Pick your tools. Add your commands. Make it your own.
+    </pre>
 </div>
 
 
@@ -129,7 +129,11 @@ chat(
 )
 ```
 
-You can run this app via `uv run app.py` and you will get an agent. The agent is basically a while loop that keeps on asking for input and the LLM will call tools when it deems it appropriate. This experience is constrained and bespoke to your needs because you fully control what tools are available to the LLM. Depending on what commands you give the LLM  it will pick up the `FileTool` or `TodoTools` to call the tools on your behalf. The `FileTool` can read/edit a specific file and the `TodoTools` can keep track of an internal todo list. You're also able to add commands to the agent that you can trigger yourself. In this example we added the `/role` command that allows you to change the role of the assistant. You'll also notice that we're adding a system prompt that you can also customise. 
+You can run this app via `uv run app.py` and you will get an agent. 
+
+The agent is basically a while loop that keeps on asking for input and the LLM will call tools when it deems it appropriate. This experience is constrained and bespoke to your needs because you fully control what tools are available to the LLM. Depending on what commands you give the LLM  it will pick up the `FileTool` or `TodoTools` to call the tools on your behalf. The `FileTool` can read/edit a specific file and the `TodoTools` can keep track of an internal todo list. 
+
+You're also able to add commands to the agent that you can trigger yourself. In this example we added the `/role` command that allows you to change the role of the assistant. You'll also notice that we're adding a system prompt that you can also customise. 
 
 ## How does it work?
 

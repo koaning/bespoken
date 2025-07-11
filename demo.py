@@ -222,10 +222,10 @@ class DynamicDataApp(App[None]):
         
         # Add user message
         output_container = self.query_one("#output-container")
-        output_container.mount(Static(f"You: {event.value}", classes="user-message"))
+        output_container.mount(Static(f"[dim]{event.value}[/dim]", classes="user-message"))
         
         # Add bot echo response
-        output_container.mount(Static(f"Bot: {event.value}", classes="bot-message"))
+        output_container.mount(Static(f"{event.value}", classes="bot-message"))
         
         # Clear input
         event.input.value = ""

@@ -91,8 +91,8 @@ def test_replace_in_file_multiple_occurrences(mock_print, mock_confirm, file_too
     assert test_file.read_text() == "Hello, Universe! Welcome to the Universe of Python."
 
 
-@patch('bespoken.config.tool_debug')
-@patch('bespoken.config.tool_status')
+@patch('bespoken.ui.tool_debug')
+@patch('bespoken.ui.tool_status')
 def test_replace_in_file_with_debug_mode(mock_tool_status, mock_tool_debug, file_tools, temp_dir):
     """Test that debug mode shows appropriate messages during replace."""
     config.DEBUG_MODE = True

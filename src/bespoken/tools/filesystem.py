@@ -83,7 +83,7 @@ class FileSystem(llm.Toolbox):
         if diff_lines:
             # Show the diff with custom formatting
             ui.tool_warning("Proposed changes:")
-            ui.print()
+            ui.print("")
             
             # Parse the diff to add line numbers and colors
             line_num_old = 0

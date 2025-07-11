@@ -206,7 +206,6 @@ pre, code {
 
 .md-nav__title {
   color: var(--terminal-accent);
-  background-color: var(--terminal-nav-bg) !important;
 }
 
 .md-typeset h1, .md-typeset h2 {
@@ -247,3 +246,19 @@ pre, code {
 }
 
 
+.md-header .md-header--lifted .md-header--shadow {
+  background-color: white !important;
+}
+
+.md-nav__link{
+  color: var(--terminal-text) !important;
+}
+
+.md-nav__link--passed{
+  color: gray !important;
+}
+
+span.filename{
+  margin: 0px !important;
+  background-color: #1414144f !important;
+}

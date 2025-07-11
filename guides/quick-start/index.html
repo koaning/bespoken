@@ -16,8 +16,6 @@
         <link rel="prev" href="../..">
       
       
-        <link rel="next" href="../../api/tools/">
-      
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
@@ -220,26 +218,6 @@
   
 
       
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../api/tools/" class="md-tabs__link">
-          
-  
-  
-  API
-
-        </a>
-      </li>
-    
-  
-
-      
     </ul>
   </div>
 </nav>
@@ -374,6 +352,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -406,6 +386,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -414,9 +396,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quickstart" class="md-nav__link">
+  <a href="#single-file-agent" class="md-nav__link">
     <span class="md-ellipsis">
-      Quickstart
+      Single file agent
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-model-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local model agent
     </span>
   </a>
   
@@ -426,148 +417,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    API
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            API
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/tools/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    tools
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/ui/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ui
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/prompts/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    prompts
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/slash-commands/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    commands
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -597,6 +446,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -605,9 +456,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quickstart" class="md-nav__link">
+  <a href="#single-file-agent" class="md-nav__link">
     <span class="md-ellipsis">
-      Quickstart
+      Single file agent
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-model-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local model agent
     </span>
   </a>
   
@@ -632,29 +492,61 @@
   
 
 
-  <h1>Quickstart</h1>
-
-<h2 id="quickstart">Quickstart</h2>
-<p>This is the simplest quickstart for an agent that can only make changes to a Python file.</p>
-<div class="highlight"><span class="filename">app.py</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken</span><span class="w"> </span><span class="kn">import</span> <span class="n">chat</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileTool</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken</span><span class="w"> </span><span class="kn">import</span> <span class="n">ui</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">set_role</span><span class="p">():</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a voice for the assistant&quot;&quot;&quot;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">roles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pirate&quot;</span><span class="p">,</span> <span class="s2">&quot;teacher&quot;</span><span class="p">,</span> <span class="s2">&quot;professor&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">role</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="s2">&quot;What role should I take?&quot;</span><span class="p">,</span> <span class="n">roles</span><span class="p">)</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;You are now speaking like a </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2">. Please respond in character for this role.&quot;</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">chat</span><span class="p">(</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;anthropic/claude-3-5-sonnet-20240620&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">FileTool</span><span class="p">(</span><span class="s2">&quot;edit.py&quot;</span><span class="p">)],</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">system_prompt</span><span class="o">=</span><span class="s2">&quot;You are a helpful assistant.&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">slash_commands</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        <span class="s2">&quot;/role&quot;</span><span class="p">:</span> <span class="n">set_role</span><span class="p">,</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="p">}</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">)</span>
+<h1 id="quickstart">Quickstart</h1>
+<h2 id="single-file-agent">Single file agent</h2>
+<p>This is the simplest quickstart for an agent that can only make changes to a Python file. We will use claude for this, which means we first need to install it. </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>llm-anthropic
+</code></pre></div>
+<p>You also need to make sure that you have an API key for claude. You can get one from <a href="https://console.anthropic.com/api-keys">Anthropic</a> and you can configure it in a <code>.env</code> file by configuring the <code>ANTHROPIC_API_KEY</code> environment variable.</p>
+<p>With that out of the way, here's the app definition.</p>
+<div class="highlight"><span class="filename">app.py</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken</span><span class="w"> </span><span class="kn">import</span> <span class="n">chat</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileTool</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken</span><span class="w"> </span><span class="kn">import</span> <span class="n">ui</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">set_role</span><span class="p">():</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a voice for the assistant&quot;&quot;&quot;</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">roles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pirate&quot;</span><span class="p">,</span> <span class="s2">&quot;teacher&quot;</span><span class="p">,</span> <span class="s2">&quot;professor&quot;</span><span class="p">]</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">role</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="s2">&quot;What role should I take?&quot;</span><span class="p">,</span> <span class="n">roles</span><span class="p">)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;You are now speaking like a </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2">. Please respond in character for this role.&quot;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">chat</span><span class="p">(</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;anthropic/claude-3-5-sonnet-20240620&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">FileTool</span><span class="p">(</span><span class="s2">&quot;edit.py&quot;</span><span class="p">)],</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">system_prompt</span><span class="o">=</span><span class="s2">&quot;You are a helpful assistant.&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="n">slash_commands</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>        <span class="s2">&quot;/role&quot;</span><span class="p">:</span> <span class="n">set_role</span><span class="p">,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="p">}</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="p">)</span>
+</code></pre></div>
+<p>You can run this app via <code>uv run app.py</code> and you will get an agent. </p>
+<h2 id="local-model-agent">Local model agent</h2>
+<p>The <a href="https://llm.datasette.io/en/stable/other-models.html">llm package</a> also supports local models via <a href="https://ollama.com/">ollama</a>, so let's try that out. First you need to make the <a href="https://github.com/taketwo/llm-ollama">llm-ollama</a> package is installed. </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv run llm install llm-ollama
+</code></pre></div>
+<p>Next, you should be able to run <code>ollama list</code> to see all the models available to ollama. These models should now also appear when you run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv run llm models | grep Ollama
+</code></pre></div>
+<p>Be aware that you can't use every ollama model. When you try to run <code>gemma3:1b</code> you'll get a <code>ValueError</code> because it doesn't support tools. You can find supported Ollama models on their <a href="https://ollama.com/search?c=tools">docs</a>. At the time of making these docs the <code>qwen3:0.6b</code> model was the lightest model that supported tools so we'll use that in our demo below.</p>
+<div class="highlight"><span class="filename">app.py</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken</span><span class="w"> </span><span class="kn">import</span> <span class="n">chat</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileTool</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bespoken</span><span class="w"> </span><span class="kn">import</span> <span class="n">ui</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">set_role</span><span class="p">():</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a voice for the assistant&quot;&quot;&quot;</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">roles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pirate&quot;</span><span class="p">,</span> <span class="s2">&quot;teacher&quot;</span><span class="p">,</span> <span class="s2">&quot;professor&quot;</span><span class="p">]</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">role</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="s2">&quot;What role should I take?&quot;</span><span class="p">,</span> <span class="n">roles</span><span class="p">)</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;You are now speaking like a </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2">. Please respond in character for this role.&quot;</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="n">chat</span><span class="p">(</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;qwen3:0.6b&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">FileTool</span><span class="p">(</span><span class="s2">&quot;blogpost.md&quot;</span><span class="p">)],</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">system_prompt</span><span class="o">=</span><span class="s2">&quot;You are a helpful writing assistant.&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="n">slash_commands</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>        <span class="s2">&quot;/role&quot;</span><span class="p">:</span> <span class="n">set_role</span><span class="p">,</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    <span class="p">}</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="p">)</span>
 </code></pre></div>
 
 

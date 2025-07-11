@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bespoken"
-version = "0.2.1"
-description = "An AI-powered coding assistant for editing files with interactive confirmations"
+version = "0.2.2"
+description = "A toolbox to build your own assistant for in the terminal."
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}

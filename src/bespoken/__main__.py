@@ -1,4 +1,7 @@
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Callable
+import json
+import uuid
 
 import llm
 import typer
@@ -129,6 +132,7 @@ def chat(
     system_prompt: Optional[str] = typer.Option(None, "--system", "-s", help="System prompt for the assistant"),
     tools: list = None,
     slash_commands: dict = None,
+    history_callback: Optional[Callable] = None,
 ):
     """Run the bespoken chat assistant."""
     # Set debug mode globally
@@ -154,7 +158,7 @@ def chat(
         raise typer.Exit(1)
     
     conversation = model.conversation(tools=tools)
-    
+    history = []
     try:
         while True:
             # Define available commands for completion (builtin + user commands)
@@ -195,17 +199,17 @@ def chat(
             spinner_text = Text("Thinking...", style="dim")
             padded_spinner = Columns([Text(" " * ui.LEFT_PADDING), Spinner("dots"), spinner_text], expand=False)
             response_started = False
-            
+
             with Live(padded_spinner, console=console, refresh_per_second=10) as live:
+                if history_callback:
+                    new_id = str(uuid.uuid4()).replace("-", "")[:24]
+                    history_callback([{"id": f"msg_{new_id}", "role": "user", "content": [{"text": out, "type": "text"}]}])
                 for chunk in conversation.chain(out, system=system_prompt):
                     if not response_started:
                         # First chunk received, stop the spinner
                         live.stop()
                         response_started = True
                         ui.print("")  # Add whitespace after spinner
-                        if config.DEBUG_MODE:
-                            ui.print("[magenta]>>> LLM Response:[/magenta]")
-                            ui.print("")
                         # Initialize streaming state
                         ui.start_streaming(ui.LEFT_PADDING)
                     
@@ -215,6 +219,11 @@ def chat(
                 # Finish streaming and print any remaining text
                 if response_started:
                     ui.end_streaming(ui.LEFT_PADDING)
+                ids = set([e["id"] for e in history])
+                new_responses = [e for e in conversation.responses if e.response_json["id"] not in ids]
+                if history_callback:
+                    history_callback([e.response_json for e in new_responses])
+
             ui.print("")  # Add extra newline after bot response
     except KeyboardInterrupt:
         ui.print("")  # Add newlines

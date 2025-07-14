@@ -1,7 +1,8 @@
 from textual.app import App, ComposeResult
-from textual.widgets import Input, Static, Label
+from textual.widgets import Input, Static, Label, Footer, ListView, ListItem, Markdown
 from textual.containers import Container, VerticalScroll, Horizontal
 from textual.events import Key
+from textual.screen import ModalScreen
 from pathlib import Path
 import os
 
@@ -70,7 +71,95 @@ class CustomAutoComplete(AutoComplete):
             # Force the autocomplete to update with the new directory contents
             self.call_after_refresh(self._handle_target_update)
 
+class CommandPalette(ModalScreen):
+    """A custom command palette modal."""
+    
+    BINDINGS = [("escape", "dismiss", "Close")]
+    
+    def compose(self) -> ComposeResult:
+        with Container(id="command-palette"):
+            yield Input(
+                placeholder="Type to search commands...",
+                id="command-search"
+            )
+            yield ListView(
+                ListItem(Label("🎨 Theme: Dark"), id="theme-dark"),
+                ListItem(Label("🎨 Theme: Light"), id="theme-light"),
+                ListItem(Label("🎨 Theme: Dracula"), id="theme-dracula"),
+                ListItem(Label("🎨 Theme: Nord"), id="theme-nord"),
+                ListItem(Label("🎨 Theme: Gruvbox"), id="theme-gruvbox"),
+                ListItem(Label("🎨 Theme: Monokai"), id="theme-monokai"),
+                ListItem(Label("🎨 Theme: Solarized Light"), id="theme-solarized-light"),
+                ListItem(Label("🎨 Theme: Solarized Dark"), id="theme-solarized-dark"),
+                ListItem(Label("❌ Clear Output"), id="cmd-clear"),
+                ListItem(Label("❓ Show Help"), id="cmd-help"),
+                ListItem(Label("🚪 Quit Application"), id="cmd-quit"),
+                id="command-list"
+            )
+    
+    def on_mount(self) -> None:
+        """Focus search input when mounted."""
+        self.query_one("#command-search").focus()
+    
+    def on_input_changed(self, event: Input.Changed) -> None:
+        """Filter commands based on search input."""
+        search_term = event.value.lower()
+        list_view = self.query_one("#command-list")
+        
+        for item in list_view.children:
+            if isinstance(item, ListItem):
+                label_text = item.query_one(Label).renderable.plain.lower()
+                item.display = search_term in label_text if search_term else True
+    
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        """Execute the selected command."""
+        command_id = event.item.id
+        
+        if command_id.startswith("theme-"):
+            theme_name = command_id.replace("theme-", "")
+            self.apply_theme(theme_name)
+        elif command_id == "cmd-clear":
+            self.clear_output()
+        elif command_id == "cmd-help":
+            self.show_help()
+        elif command_id == "cmd-quit":
+            self.app.exit()
+        
+        self.dismiss()
+    
+    def apply_theme(self, theme_name: str) -> None:
+        """Apply the selected theme."""
+        self.app.dark = True
+        
+        if theme_name == "light":
+            self.app.dark = False
+        elif theme_name == "solarized-light":
+            self.app.dark = False
+            self.app.theme = "solarized-light"
+        else:
+            self.app.theme = theme_name
+    
+    def clear_output(self) -> None:
+        """Clear the output container."""
+        self.app.markdown_output.update("**Output cleared!**")
+    
+    def show_help(self) -> None:
+        """Show help message in output."""
+        help_text = """\n\n## Available shortcuts:
+- **Ctrl+K**: Open command palette
+- **@ + filename**: Autocomplete files
+- **/ + command**: Autocomplete commands
+- **Ctrl+C**: Quit application"""
+        self.app.markdown_output.append(help_text)
+        output = self.app.query_one("#output-container")
+        output.anchor()
+
+
 class DynamicDataApp(App[None]):
+    BINDINGS = [
+        ("ctrl+k", "open_command_palette", "Command Palette"),
+    ]
+    
     CSS = """
     #output-container {
         height: 1fr;
@@ -81,17 +170,20 @@ class DynamicDataApp(App[None]):
     #input-container {
         height: 3;
         dock: bottom;
+        margin-bottom: 2;
     }
     
     Input {
         dock: bottom;
+        border: solid $surface-lighten-1;
+        padding: 0 1;
+        margin: 0 1;
     }
     
-    #prompt-label {
-        width: 2;
-        content-align: center middle;
-        color: $primary;
+    Input:focus {
+        border: solid $surface-lighten-2;
     }
+    
     
     Horizontal {
         height: 3;
@@ -106,6 +198,33 @@ class DynamicDataApp(App[None]):
         color: $success;
         margin-bottom: 1;
     }
+    
+    #command-palette {
+        width: 60;
+        height: 80%;
+        max-height: 30;
+        background: $surface;
+        border: thick $primary;
+        padding: 1;
+    }
+    
+    #command-search {
+        margin-bottom: 1;
+        width: 100%;
+    }
+    
+    #command-list {
+        height: 1fr;
+        background: $panel;
+    }
+    
+    #command-list > ListItem {
+        padding: 0 1;
+    }
+    
+    #command-list > ListItem.--highlight {
+        background: $primary 20%;
+    }
     """
     
     def compose(self) -> ComposeResult:
@@ -116,11 +235,13 @@ class DynamicDataApp(App[None]):
         # Input area at the bottom
         with Container(id="input-container"):
             with Horizontal():
-                yield Label(">", id="prompt-label")
                 input_widget = Input(placeholder="Type @ for files, / for commands...", id="chat-input")
                 yield input_widget
                 self.autocomplete = CustomAutoComplete(input_widget, candidates=self.candidates_callback)
                 yield self.autocomplete
+        
+        # Footer showing command palette shortcut
+        yield Footer()
 
     def candidates_callback(self, state: TargetState) -> list[DropdownItem]:
         # Get the current word at cursor position
@@ -208,30 +329,36 @@ class DynamicDataApp(App[None]):
 
     def on_mount(self) -> None:
         """Focus the input when the app starts"""
-        # Add welcome message
+        # Add welcome message using a single Markdown widget
         output_container = self.query_one("#output-container")
-        output_container.mount(Static("Welcome! Try typing @ for files or / for commands", classes="bot-message"))
+        self.markdown_output = Markdown("**Welcome!** Try typing `@` for files or `/` for commands. Press `Ctrl+K` for command palette.")
+        output_container.mount(self.markdown_output)
         
         # Focus the input
         self.query_one("#chat-input").focus()
+    
+    def action_open_command_palette(self) -> None:
+        """Open the custom command palette."""
+        self.push_screen(CommandPalette())
     
     def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle when user presses Enter"""
         if not event.value:
             return
         
-        # Add user message
-        output_container = self.query_one("#output-container")
-        output_container.mount(Static(f"[dim]{event.value}[/dim]", classes="user-message"))
+        # Add user message and bot response using markdown.append
+        user_message = f"\n\n**You:** {event.value}"
+        bot_response = f"\n\n**Bot:** {event.value}"
         
-        # Add bot echo response
-        output_container.mount(Static(f"{event.value}", classes="bot-message"))
+        self.markdown_output.append(user_message)
+        self.markdown_output.append(bot_response)
         
         # Clear input
         event.input.value = ""
         
-        # Scroll to bottom
-        output_container.scroll_end()
+        # Anchor to bottom so it sticks as content is added
+        output_container = self.query_one("#output-container")
+        output_container.anchor()
     
     def on_key(self, event: Key) -> None:
         # Handle Ctrl+C to quit

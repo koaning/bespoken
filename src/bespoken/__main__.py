@@ -133,7 +133,7 @@ def chat(
     tools: list = None,
     slash_commands: dict = None,
     history_callback: Optional[Callable] = None,
-    stream: bool = typer.Option(True, "--stream", "-s", help="Stream the response from the LLM", default=True),
+    stream: bool = typer.Option(True, "--stream", "-s", help="Stream the response from the LLM"),
 ):
     """Run the bespoken chat assistant."""
     # Set debug mode globally

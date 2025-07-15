@@ -133,6 +133,7 @@ def chat(
     tools: list = None,
     slash_commands: dict = None,
     history_callback: Optional[Callable] = None,
+    stream: bool = typer.Option(True, "--stream", "-s", help="Stream the response from the LLM"),
 ):
     """Run the bespoken chat assistant."""
     # Set debug mode globally
@@ -204,7 +205,7 @@ def chat(
                 if history_callback:
                     new_id = str(uuid.uuid4()).replace("-", "")[:24]
                     history_callback([{"id": f"msg_{new_id}", "role": "user", "content": [{"text": out, "type": "text"}]}])
-                for chunk in conversation.chain(out, system=system_prompt):
+                for chunk in conversation.chain(out, system=system_prompt, stream=stream):
                     if not response_started:
                         # First chunk received, stop the spinner
                         live.stop()

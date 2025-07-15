@@ -129,6 +129,7 @@ def chat(
     system_prompt: Optional[str] = typer.Option(None, "--system", "-s", help="System prompt for the assistant"),
     tools: list = None,
     slash_commands: dict = None,
+    stream: bool = typer.Option(True, "--stream", "-s", help="Stream the response from the LLM", default=True),
 ):
     """Run the bespoken chat assistant."""
     # Set debug mode globally
@@ -197,7 +198,7 @@ def chat(
             response_started = False
             
             with Live(padded_spinner, console=console, refresh_per_second=10) as live:
-                for chunk in conversation.chain(out, system=system_prompt):
+                for chunk in conversation.chain(out, system=system_prompt, stream=stream):
                     if not response_started:
                         # First chunk received, stop the spinner
                         live.stop()

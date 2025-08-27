@@ -15,8 +15,8 @@ from .file_completer import create_completer
 
 
 # Global padding configuration
-LEFT_PADDING = 2
-RIGHT_PADDING = 2
+LEFT_PADDING = 0
+RIGHT_PADDING = 0
 
 # Private console instance - all output must go through this module
 _console = Console()

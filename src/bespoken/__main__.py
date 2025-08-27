@@ -133,6 +133,8 @@ def chat(
     tools: list = None,
     slash_commands: dict = None,
     history_callback: Optional[Callable] = None,
+    first_message: Optional[str] = None,
+    show_banner: bool = True,
 ):
     """Run the bespoken chat assistant."""
     # Set debug mode globally
@@ -144,7 +146,12 @@ def chat(
     console = Console()
 
     # Show the banner
-    ui.show_banner()
+    if show_banner:
+        ui.show_banner()
+    
+    if first_message:
+        ui.print(first_message)
+        ui.print("")
     
     if debug:
         ui.print("[magenta]Debug mode enabled[/magenta]")
@@ -193,23 +200,25 @@ def chat(
             if not out.strip():
                 continue
             
-            ui.print("")  # Add whitespace before thinking spinner
             # Show spinner while getting initial response
             # Create a padded spinner
             spinner_text = Text("Thinking...", style="dim")
             padded_spinner = Columns([Text(" " * ui.LEFT_PADDING), Spinner("dots"), spinner_text], expand=False)
             response_started = False
 
-            with Live(padded_spinner, console=console, refresh_per_second=10) as live:
+            with Live(padded_spinner, console=console, refresh_per_second=10, transient=True) as live:
                 if history_callback:
                     new_id = str(uuid.uuid4()).replace("-", "")[:24]
                     history_callback([{"id": f"msg_{new_id}", "role": "user", "content": [{"text": out, "type": "text"}]}])
                 for chunk in conversation.chain(out, system=system_prompt):
                     if not response_started:
-                        # First chunk received, stop the spinner
+                        # First chunk received, clear and stop the spinner so it disappears
+                        try:
+                            live.update(Text(""), refresh=True)
+                        except Exception:
+                            pass
                         live.stop()
                         response_started = True
-                        ui.print("")  # Add whitespace after spinner
                         # Initialize streaming state
                         ui.start_streaming(ui.LEFT_PADDING)
                     

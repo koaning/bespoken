@@ -10,6 +10,8 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.keys import Keys
 import questionary
 from .file_completer import create_completer
 
@@ -242,12 +244,28 @@ def stream(chunks, indent: int = LEFT_PADDING, wrap: bool = True) -> None:
         _console.print(f"[dim]{word_buffer}[/dim]", end="", highlight=False)
 
 
-def input(prompt_text: str, indent: int = LEFT_PADDING, completions: Optional[List[str]] = None) -> str:
+def input(prompt_text: str, indent: int = LEFT_PADDING, completions: Optional[List[str]] = None, 
+          mode_switcher_callback = None, available_modes: Optional[List[str]] = None) -> str:
     """Get input with left padding and optional completions."""
     padded_prompt = " " * indent + prompt_text
     
     # Use combined completer for commands and file paths
     completer = create_completer(completions) if completions else None
+    
+    # Create key bindings for mode switching
+    bindings = KeyBindings()
+    
+    if mode_switcher_callback and available_modes:
+        @bindings.add('s-tab')  # Shift+Tab
+        def _(event):
+            """Switch to next mode on Shift+Tab"""
+            try:
+                next_mode = mode_switcher_callback()
+                if next_mode:
+                    # Show mode switch feedback
+                    _console.print(f"{' ' * indent}[dim]→ Switched to {next_mode} mode[/dim]")
+            except Exception:
+                pass  # Ignore errors in mode switching
     
     # Create a style with auto-suggestion preview in gray
     style = Style.from_dict({
@@ -270,6 +288,7 @@ def input(prompt_text: str, indent: int = LEFT_PADDING, completions: Optional[Li
             auto_suggest=AutoSuggestFromHistory(),  # Suggest from history
             history=_command_history,  # Enable history with up/down arrows
             enable_history_search=False,  # Disable Ctrl+R search
+            key_bindings=bindings,  # Add custom key bindings
         )
         return result
     except (KeyboardInterrupt, EOFError):

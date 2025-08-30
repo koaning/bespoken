@@ -205,6 +205,41 @@ class Chat:
         """Return list of available modes."""
         return self.available_modes.copy() if self._is_modes_enabled() else []
     
+    def switch_to_next_mode(self) -> str:
+        """Switch to the next mode in the list (for keyboard shortcut)."""
+        if not self._is_modes_enabled() or len(self.available_modes) <= 1:
+            return None
+        
+        current_index = self.available_modes.index(self.current_mode)
+        next_index = (current_index + 1) % len(self.available_modes)
+        next_mode = self.available_modes[next_index]
+        
+        # Save conversation history before switching
+        self.conversation_history = [msg.response_json for msg in self.conversation.responses]
+        
+        # Switch mode silently (no UI feedback here, handled by input function)
+        old_mode = self.current_mode
+        self.current_mode = next_mode
+        self._initialize_model()
+        
+        # Send mode switch message if configured
+        if next_mode in self.mode_switch_messages:
+            switch_message = self.mode_switch_messages[next_mode]
+            for _ in self.conversation.chain(switch_message, system=self.system_prompt):
+                pass  # Consume the response silently
+        
+        # Replay conversation history
+        for msg in self.conversation_history:
+            if msg.get("role") == "user":
+                content = msg.get("content", [])
+                if content and isinstance(content, list) and content[0].get("type") == "text":
+                    text = content[0].get("text", "")
+                    if text:  # Only replay non-empty user messages
+                        for _ in self.conversation.chain(text, system=self.system_prompt):
+                            pass  # Consume responses silently
+        
+        return next_mode
+    
     def switch_mode(self, new_mode: str):
         """Switch to a different mode."""
         if not self._is_modes_enabled():
@@ -284,7 +319,11 @@ class Chat:
                 
                 # Show completion hint on first prompt
                 if not hasattr(self, '_shown_completion_hint'):
-                    ui.print("[dim]Tips: TAB for completions • @file.py for file paths • ↑/↓ for history • Ctrl+U to clear[/dim]")
+                    tip_text = "[dim]Tips: TAB for completions • @file.py for file paths • ↑/↓ for history • Ctrl+U to clear"
+                    if self._is_modes_enabled() and len(self.available_modes) > 1:
+                        tip_text += " • Shift+TAB to switch modes"
+                    tip_text += "[/dim]"
+                    ui.print(tip_text)
                     self._shown_completion_hint = True
                 
                 # Create mode-aware prompt
@@ -293,7 +332,16 @@ class Chat:
                 else:
                     prompt = "> "
                 
-                out = ui.input(prompt, completions=completions).strip()
+                # Prepare mode switching for keyboard shortcut
+                mode_switcher = self.switch_to_next_mode if self._is_modes_enabled() else None
+                available_modes = self.get_available_modes() if self._is_modes_enabled() else None
+                
+                out = ui.input(
+                    prompt, 
+                    completions=completions,
+                    mode_switcher_callback=mode_switcher,
+                    available_modes=available_modes
+                ).strip()
                 
                 # Handle slash commands (only if it's a known command)
                 if out.startswith("/"):
@@ -389,8 +437,10 @@ class Chat:
         ui.print("  /debug  - Toggle debug mode")
         
         if self._is_modes_enabled():
-            ui.print("  /mode   - Switch mode (usage: /mode <mode_name>)")
+            ui.print("  /mode   - Switch mode interactively or /mode <mode_name>")
             ui.print("  /modes  - List available modes")
+            if len(self.available_modes) > 1:
+                ui.print("  [dim]Shift+TAB - Quick switch to next mode[/dim]")
         
         if user_commands:
             ui.print("")
@@ -432,11 +482,28 @@ class Chat:
             return COMMAND_HANDLED
         
         if not args.strip():
-            # No mode specified, show usage
-            ui.print("[yellow]Usage: /mode <mode_name>[/yellow]")
-            ui.print(f"[dim]Available modes: {', '.join(self.available_modes)}[/dim]")
-            ui.print(f"[dim]Current mode: {self.current_mode}[/dim]")
-            ui.print("")
+            # No mode specified, show interactive picker
+            try:
+                # Create choices with current mode indicator
+                choices = []
+                for mode in self.available_modes:
+                    if mode == self.current_mode:
+                        choices.append(f"{mode} (current)")
+                    else:
+                        choices.append(mode)
+                
+                selected = ui.choice("Select mode:", choices)
+                if selected:
+                    # Extract mode name (remove " (current)" if present)
+                    target_mode = selected.replace(" (current)", "")
+                    if target_mode != self.current_mode:
+                        self.switch_mode(target_mode)
+                    else:
+                        ui.print(f"[dim]Already in {target_mode} mode[/dim]")
+                        ui.print("")
+            except KeyboardInterrupt:
+                ui.print("[dim]Mode selection cancelled[/dim]")
+                ui.print("")
             return COMMAND_HANDLED
         
         # Switch to the specified mode

@@ -2,7 +2,7 @@ import srsly
 from pathlib import Path
 import json
 
-from bespoken import chat
+from bespoken import Chat
 from bespoken.tools import FileTool, TodoTools
 from bespoken.prompts import marimo_prompt
 from bespoken import ui
@@ -26,15 +26,29 @@ def debug_reason():
     return out
 
 
-chat(
+# Define tools for different modes
+file_tool = FileTool("edit.py")
+todo_tools = TodoTools()
+
+Chat(
     model_name="anthropic/claude-3-5-sonnet-20240620",
-    tools=[FileTool("edit.py"), TodoTools()],
+    tools={
+        "development": [file_tool, todo_tools],  # Full development capabilities
+        "review": [file_tool],  # Code review mode - can read files but no todo management
+        "planning": [],  # Planning mode - no tools, pure discussion
+    },
+    mode_switch_messages={
+        "development": "You are now in development mode. You can edit files and manage todos. Focus on implementing features and fixing bugs.",
+        "review": "You are now in review mode. You can read files to understand the codebase but cannot make changes. Focus on analyzing code and providing feedback.",
+        "planning": "You are now in planning mode. You cannot access files or tools. Focus on high-level discussion, architecture planning, and strategic thinking.",
+    },
     system_prompt=marimo_prompt,
     debug=True,
+    initial_mode="development",
     slash_commands={
         "/thinking": "Let me think through this step by step:",
         "/role": set_role,
         "/debug_prompt": debug_reason,
     },
     history_callback=lambda x: srsly.write_jsonl(Path("logs.json"), x, append=True, append_new_line=False)
-)
+).run()

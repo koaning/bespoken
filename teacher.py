@@ -1,4 +1,4 @@
-from bespoken import chat
+from bespoken import Chat
 from bespoken.prompts import socratic_prompt
 from bespoken import ui
 
@@ -10,7 +10,7 @@ def set_voice():
     return f"You are now acting as a {role}. Please respond in character but stick to the topic of teaching."
 
 
-chat(
+Chat(
     model_name="anthropic/claude-3-5-sonnet-20240620",
     tools=[],
     system_prompt=socratic_prompt,
@@ -20,4 +20,4 @@ chat(
     },
     first_message="I can teach you anything about a technical topic. What would you like to learn?",
     show_banner=False
-)
+).run()
